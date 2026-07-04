@@ -1,0 +1,481 @@
+name: Deploy Test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        run: |
+          set -euo pipefail
+          branch="${GITHUB_REF_NAME:-}"
+          if [ -z "${branch}" ]; then
+            ref="${GITHUB_REF:-}"
+            branch="${ref#refs/heads/}"
+          fi
+          if [ -z "${branch}" ]; then
+            echo "Cannot determine pushed branch for checkout." >&2
+            exit 1
+          fi
+          repo_url="${GITHUB_SERVER_URL:-http://43.154.197.96}/${GITHUB_REPOSITORY}.git"
+          git init .
+          git remote set-url origin "${repo_url}" 2>/dev/null || git remote add origin "${repo_url}"
+          git fetch --depth=50 --prune origin "+refs/heads/${branch}:refs/remotes/origin/${branch}"
+          git checkout --force "${GITHUB_SHA}"
+          git reset --hard "${GITHUB_SHA}"
+          git status --short --branch
+
+      - name: Prepare test environment
+        env:
+          HUIXIAO_TEST_ENV_FILE_OVERRIDE: ${{ secrets.HUIXIAO_TEST_ENV_FILE_OVERRIDE }}
+          HUIXIAO_TEST_ENV_FILE: ${{ secrets.HUIXIAO_TEST_ENV_FILE }}
+          HUIXIAO_TEST_ENV_PATH: ${{ secrets.HUIXIAO_TEST_ENV_PATH }}
+        run: |
+          commit_message="$(git log -1 --pretty=%B)"
+          if printf '%s\n' "${commit_message}" | grep -Eq '\[(stop-huiyi|status-huiyi)\]'; then
+            echo "Stop/status operation marker detected; skipping test env materialization."
+            exit 0
+          fi
+
+          env_value() {
+            sed -n "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*//p" "$2" |
+              tail -n 1 |
+              tr -d '\r' |
+              sed 's/^"//; s/"$//; s/^'\''//; s/'\''$//'
+          }
+
+          validate_test_env() {
+            env_file="$1"
+            source_name="$2"
+            database_url="$(env_value HUIXIAO_DATABASE_URL "${env_file}")"
+            if [ -z "${database_url}" ]; then
+              echo "Ignoring ${source_name}: missing HUIXIAO_DATABASE_URL."
+              return 1
+            fi
+            for required_payment_key in \
+              HUIXIAO_ALIPAY_APP_ID \
+              HUIXIAO_ALIPAY_PRIVATE_KEY \
+              HUIXIAO_ALIPAY_PUBLIC_KEY \
+              HUIXIAO_ALIPAY_NOTIFY_URL; do
+              required_payment_value="$(env_value "${required_payment_key}" "${env_file}")"
+              if [ -z "${required_payment_value}" ] || printf '%s' "${required_payment_value}" | grep -Eq '^replace-with-|replace-with-'; then
+                echo "Ignoring ${source_name}: missing or placeholder ${required_payment_key}."
+                return 1
+              fi
+            done
+            if grep -Eq '^[[:space:]]*HUIXIAO_POSTGRES_' "${env_file}"; then
+              echo "Ignoring ${source_name}: legacy HUIXIAO_POSTGRES_* keys are present."
+              return 1
+            fi
+            case "${database_url}" in
+              mysql*|mariadb*) ;;
+              *)
+                echo "Ignoring ${source_name}: HUIXIAO_DATABASE_URL must use the shared remote MySQL/MariaDB profile."
+                return 1
+                ;;
+            esac
+            case "${database_url}" in
+              *localhost*|*127.0.0.1*|*10.0.2.2*|*sqlite*|*sqlite3*)
+                echo "Ignoring ${source_name}: HUIXIAO_DATABASE_URL points to a local or sqlite database."
+                return 1
+                ;;
+            esac
+            echo "Using test environment from ${source_name}."
+            echo "Sanitized DB config: HUIXIAO_DATABASE_URL present, scheme=${database_url%%:*}, local=false, legacy_postgres_keys=false."
+            return 0
+          }
+
+          audit_test_env() {
+            env_file="$1"
+            source_name="$2"
+            echo "Selected test environment content audit: source=${source_name}"
+            while IFS= read -r raw_line || [ -n "${raw_line}" ]; do
+              line="$(printf '%s' "${raw_line}" | tr -d '\r')"
+              case "${line}" in
+                ""|\#*) continue ;;
+                *=*) ;;
+                *) continue ;;
+              esac
+
+              key="$(printf '%s' "${line%%=*}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+              value="$(printf '%s' "${line#*=}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//; s/^"//; s/"$//; s/^'\''//; s/'\''$//')"
+              case "${key}" in
+                HUIXIAO_DATABASE_URL)
+                  sanitized_url="$(printf '%s' "${value}" | sed -E 's#^([^:]+://)([^/@]*@)?([^/?]+)(/.*)?$#\1<credentials-redacted>@\3\4#')"
+                  echo "${key}=${sanitized_url}"
+                  ;;
+                HUIXIAO_SMS_TEMPLATE_ID|HUIXIAO_SMS_TEMPLATE_LOGIN_ID|HUIXIAO_SMS_TEMPLATE_CHANGE_PHONE_ID|HUIXIAO_SMS_TEMPLATE_CHANGE_PASSWORD_ID|HUIXIAO_SMS_TEMPLATE_PARAM_MODE)
+                  echo "${key}=${value}"
+                  ;;
+                HUIXIAO_ALIPAY_PRIVATE_KEY|HUIXIAO_ALIPAY_PUBLIC_KEY)
+                  fingerprint="$(printf '%s' "${value}" | python3 -c 'import hashlib,sys; value=sys.stdin.read().strip().strip("\"").strip("'"'"'").strip(); value=value.replace("\\r\\n","\n").replace("\\n","\n").replace("\\r","\n").replace("\r\n","\n").replace("\r","\n"); body="".join(line.strip() for line in value.splitlines() if line.strip() and not line.strip().startswith("-----")); print((hashlib.sha256(body.encode("ascii")).hexdigest()[:16] if body else "") + " " + str(len(body)))')"
+                  echo "${key}=<redacted sha256_16=${fingerprint%% *} len=${fingerprint##* }>"
+                  ;;
+                HUIXIAO_APPLE_PRIVATE_KEY)
+                  fingerprint="$(printf '%s' "${value}" | python3 -c 'import hashlib,sys; value=sys.stdin.read().strip().strip("\"").strip("'"'"'").strip(); value=value.replace("\\r\\n","\n").replace("\\n","\n").replace("\\r","\n").replace("\r\n","\n").replace("\r","\n"); body="".join(line.strip() for line in value.splitlines() if line.strip() and not line.strip().startswith("-----")); print((hashlib.sha256(body.encode("ascii")).hexdigest()[:16] if body else "") + " " + str(len(body)))')"
+                  echo "${key}=<redacted sha256_16=${fingerprint%% *} len=${fingerprint##* }>"
+                  ;;
+                *SECRET*|*KEY*|*TOKEN*|*PASSWORD*|*DEV_CODE*)
+                  if [ -n "${value}" ]; then
+                    echo "${key}=<redacted>"
+                  else
+                    echo "${key}=<empty>"
+                  fi
+                  ;;
+                *)
+                  echo "${key}=${value}"
+                  ;;
+              esac
+            done < "${env_file}"
+            echo "End selected test environment content audit."
+          }
+
+          strip_legacy_asr_config() {
+            env_file="$1"
+            source_name="$2"
+            legacy_key_regex='^[[:space:]]*(HUIXIAO_DOLPHIN_HOST_PATH|HUIXIAO_FUNASR_SHIM_HOST_PATH|HUIXIAO_DOLPHIN_MODEL_HOST_PATH|HUIXIAO_ASR_ASSET_TARGET_DIR|HUIXIAO_ASR_ASSET_ARCHIVE_URL|HUIXIAO_ASR_ASSET_ARCHIVE_PATH|HUIXIAO_ENABLE_LOCAL_DIARIZATION)[[:space:]]*='
+            if grep -Eq "${legacy_key_regex}" "${env_file}"; then
+              removed_keys="$(sed -nE "s/${legacy_key_regex}.*/\1/p" "${env_file}" | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')"
+              echo "Removing legacy ASR env keys from ${source_name}: ${removed_keys}"
+              grep -Ev "${legacy_key_regex}" "${env_file}" > "${env_file}.sanitized"
+              mv "${env_file}.sanitized" "${env_file}"
+            fi
+          }
+
+          append_missing_runtime_defaults() {
+            env_file="$1"
+            source_name="$2"
+            defaults_file="deploy/.env.example"
+            if [ ! -f "${defaults_file}" ]; then
+              return
+            fi
+
+            runtime_default_keys="
+          HUIXIAO_TEST_API_PORT
+          HUIXIAO_DEPLOY_ACTION
+          HUIXIAO_DB_CONNECT_TIMEOUT_SECONDS
+          HUIXIAO_DB_READ_TIMEOUT_SECONDS
+          HUIXIAO_DB_WRITE_TIMEOUT_SECONDS
+          HUIXIAO_LLM_BASE_URL
+          HUIXIAO_LLM_MODEL
+          HUIXIAO_EMBEDDING_MODEL
+          HUIXIAO_EMBEDDING_DIMENSIONS
+          HUIXIAO_EMBEDDING_TIMEOUT_SECONDS
+          HUIXIAO_KNOWLEDGE_PLAN_TIMEOUT_SECONDS
+          HUIXIAO_KNOWLEDGE_ANSWER_TIMEOUT_SECONDS
+          HUIXIAO_LLM_TIMEOUT_SECONDS
+          HUIXIAO_LLM_ATTEMPT_TIMEOUT_SECONDS
+          HUIXIAO_LLM_RETRY_COUNT
+          HUIXIAO_LLM_TEMPERATURE
+          HUIXIAO_MINUTES_ENABLE_THINKING
+          HUIXIAO_MINUTES_THINKING_BUDGET
+          HUIXIAO_MINUTES_TIMEOUT_MIN_SECONDS
+          HUIXIAO_MINUTES_TIMEOUT_BUFFER_SECONDS
+          HUIXIAO_MINUTES_TIMEOUT_PER_AUDIO_SECOND
+          HUIXIAO_MINUTES_TIMEOUT_MAX_SECONDS
+          HUIXIAO_MINUTES_RETRY_COUNT
+          HUIXIAO_ASR_FILE_TIMEOUT_SECONDS
+          HUIXIAO_AI_MINUTES_TIMEOUT_MIN_SECONDS
+          HUIXIAO_AI_MINUTES_TIMEOUT_BUFFER_SECONDS
+          HUIXIAO_AI_MINUTES_TIMEOUT_PER_AUDIO_SECOND
+          HUIXIAO_AI_MINUTES_TIMEOUT_MAX_SECONDS
+          HUIXIAO_AI_EMBEDDING_TIMEOUT_SECONDS
+          HUIXIAO_AI_KNOWLEDGE_PLAN_TIMEOUT_SECONDS
+          HUIXIAO_AI_KNOWLEDGE_ANSWER_TIMEOUT_SECONDS
+          HUIXIAO_STALE_PROCESSING_TIMEOUT_SECONDS
+          HUIXIAO_MAX_UPLOAD_MB
+          HUIXIAO_CORS_ORIGINS
+          HUIXIAO_ALIPAY_APP_ID
+          HUIXIAO_ALIPAY_PRIVATE_KEY
+          HUIXIAO_ALIPAY_PUBLIC_KEY
+          HUIXIAO_ALIPAY_NOTIFY_URL
+          HUIXIAO_ALIPAY_GATEWAY_URL
+          HUIXIAO_ALIPAY_AES_KEY
+          HUIXIAO_ALIPAY_PAYMENT_MODE
+          HUIXIAO_ALIPAY_RETURN_URL
+          HUIXIAO_ALIYUN_DASHSCOPE_API_KEY
+          HUIXIAO_ALIYUN_WORKSPACE_ID
+          HUIXIAO_ALIYUN_REGION
+          HUIXIAO_ALIYUN_API_HOST
+          HUIXIAO_ALIYUN_REALTIME_WS_URL
+          HUIXIAO_ALIYUN_REALTIME_TOKEN_URL
+          HUIXIAO_ALIYUN_REALTIME_MODEL
+          HUIXIAO_ALIYUN_REALTIME_DIRECT_ENABLED
+          HUIXIAO_ALIYUN_REALTIME_TOKEN_TTL_SECONDS
+          HUIXIAO_ALIYUN_REALTIME_TOKEN_REQUEST_TIMEOUT_SECONDS
+          HUIXIAO_ALIYUN_REALTIME_TOKEN_REFRESH_MARGIN_SECONDS
+          HUIXIAO_ALIYUN_REALTIME_PREWARM_ENABLED
+          HUIXIAO_ALIYUN_LIVE_VAD_THRESHOLD
+          HUIXIAO_ALIYUN_LIVE_VAD_SILENCE_DURATION_MS
+          HUIXIAO_ALIYUN_LIVE_FILTER_FILLER
+          HUIXIAO_ALIYUN_LIVE_FILLER_MAX_DURATION_MS
+          HUIXIAO_ALIYUN_FILE_MODEL
+          HUIXIAO_ALIYUN_FILE_TRANSCRIPTION_URL
+          HUIXIAO_ALIYUN_FILE_TASK_URL
+          HUIXIAO_ALIYUN_FILE_POLL_INTERVAL_SECONDS
+          HUIXIAO_ALIYUN_FILE_POLL_TIMEOUT_SECONDS
+          HUIXIAO_APPLE_IAP_ENABLED
+          HUIXIAO_APPLE_PRODUCT_PREFIX
+          HUIXIAO_APPLE_BUNDLE_ID
+          HUIXIAO_APPLE_ISSUER_ID
+          HUIXIAO_APPLE_KEY_ID
+          HUIXIAO_APPLE_PRIVATE_KEY
+          HUIXIAO_APPLE_ENVIRONMENT
+          HUIXIAO_ASR_DEVICE
+          HUIXIAO_ASR_MAX_SPEAKERS
+          HUIXIAO_ASR_VOICEPRINT_TIMEOUT_MIN_SECONDS
+          HUIXIAO_ASR_VOICEPRINT_TIMEOUT_BUFFER_SECONDS
+          HUIXIAO_ASR_VOICEPRINT_TIMEOUT_PER_AUDIO_SECOND
+          HUIXIAO_ASR_VOICEPRINT_TIMEOUT_MAX_SECONDS
+          HUIXIAO_ASR_VOICEPRINT_ENROLL_TIMEOUT_SECONDS
+          HUIXIAO_AUDIO_PREPARE_TIMEOUT_SECONDS
+          HUIXIAO_FILE_ASR_RUNTIME_TIMEOUT_MIN_SECONDS
+          HUIXIAO_FILE_ASR_RUNTIME_TIMEOUT_BUFFER_SECONDS
+          HUIXIAO_FILE_ASR_RUNTIME_TIMEOUT_PER_AUDIO_SECOND
+          HUIXIAO_FILE_ASR_RUNTIME_TIMEOUT_MAX_SECONDS
+          HUIXIAO_FUNASR_RUNTIME_DEVICE
+          HUIXIAO_FUNASR_RUNTIME_NGPU
+          HUIXIAO_FUNASR_RUNTIME_NCPU
+          HUIXIAO_FUNASR_WORKER_THREADS
+          HUIXIAO_FUNASR_CONCURRENT_VAD
+          HUIXIAO_FUNASR_CONCURRENT_ASR_ONLINE
+          HUIXIAO_FUNASR_CONCURRENT_ASR_OFFLINE
+          HUIXIAO_FUNASR_CONCURRENT_PUNC
+          HUIXIAO_FUNASR_CONCURRENT_SV
+          HUIXIAO_SPEAKER_CLUSTER_THRESHOLD
+          HUIXIAO_FUNASR_VAD_MAX_END_SILENCE_MS
+          HUIXIAO_FUNASR_OFFLINE_ENDPOINT_DELAY_MS
+          HUIXIAO_FUNASR_OFFLINE_MERGE_SILENCE_MS
+          HUIXIAO_FUNASR_OFFLINE_PRE_ROLL_MS
+          HUIXIAO_LIVE_ASR_MODE
+          HUIXIAO_LIVE_REQUIRE_SPEAKER
+          HUIXIAO_FUNASR_STARTUP_TIMEOUT_SECONDS
+          MODELSCOPE_DOMAIN
+          MODELSCOPE_DOWNLOAD_PARALLELS
+          MODELSCOPE_PARALLEL_DOWNLOAD_THRESHOLD_MB
+          "
+
+            appended_keys=""
+            for key in ${runtime_default_keys}; do
+              if grep -Eq "^[[:space:]]*${key}[[:space:]]*=" "${env_file}"; then
+                continue
+              fi
+              default_line="$(grep -E "^[[:space:]]*${key}[[:space:]]*=" "${defaults_file}" | tail -n 1 || true)"
+              if [ -z "${default_line}" ]; then
+                continue
+              fi
+              printf '%s\n' "${default_line}" >> "${env_file}"
+              appended_keys="${appended_keys} ${key}"
+            done
+
+            if [ -n "${appended_keys}" ]; then
+              appended_keys="$(printf '%s' "${appended_keys}" | sed 's/^[[:space:]]*//')"
+              echo "Appending missing non-secret runtime defaults to ${source_name}: ${appended_keys}"
+            fi
+          }
+
+          apply_release_sms_template_ids() {
+            env_file="$1"
+            source_name="$2"
+            python3 - "${env_file}" <<'PY'
+          import sys
+          from pathlib import Path
+
+          env_path = Path(sys.argv[1])
+          release_template_id = "2660883"
+          keys = {
+              "HUIXIAO_SMS_TEMPLATE_ID": release_template_id,
+              "HUIXIAO_SMS_TEMPLATE_LOGIN_ID": release_template_id,
+              "HUIXIAO_SMS_TEMPLATE_CHANGE_PHONE_ID": release_template_id,
+              "HUIXIAO_SMS_TEMPLATE_CHANGE_PASSWORD_ID": release_template_id,
+              "HUIXIAO_SMS_TEMPLATE_PARAM_MODE": "code",
+          }
+
+          lines = env_path.read_text(encoding="utf-8").splitlines()
+          seen: set[str] = set()
+          next_lines: list[str] = []
+          for line in lines:
+              stripped = line.strip()
+              if not stripped or stripped.startswith("#") or "=" not in line:
+                  next_lines.append(line)
+                  continue
+              key = line.split("=", 1)[0].strip()
+              if key in keys:
+                  next_lines.append(f"{key}={keys[key]}")
+                  seen.add(key)
+              else:
+                  next_lines.append(line)
+          for key, value in keys.items():
+              if key not in seen:
+                  next_lines.append(f"{key}={value}")
+          env_path.write_text("\n".join(next_lines) + "\n", encoding="utf-8")
+          PY
+            echo "Applying release SMS template IDs to ${source_name}: HUIXIAO_SMS_TEMPLATE_*=${release_template_id:-2660883}"
+          }
+
+          activate_test_env() {
+            env_file="$1"
+            source_name="$2"
+            strip_legacy_asr_config "${env_file}" "${source_name}"
+            append_missing_runtime_defaults "${env_file}" "${source_name}"
+            apply_release_sms_template_ids "${env_file}" "${source_name}"
+            if [ "${env_file}" != "deploy/.env" ]; then
+              mv "${env_file}" deploy/.env
+            fi
+            audit_test_env deploy/.env "${source_name}"
+            exit 0
+          }
+
+          if [ -n "${HUIXIAO_TEST_ENV_FILE_OVERRIDE:-}" ]; then
+            printf '%s\n' "${HUIXIAO_TEST_ENV_FILE_OVERRIDE}" > deploy/.env.candidate
+            if validate_test_env deploy/.env.candidate "HUIXIAO_TEST_ENV_FILE_OVERRIDE secret"; then
+              activate_test_env deploy/.env.candidate "HUIXIAO_TEST_ENV_FILE_OVERRIDE secret"
+            fi
+            rm -f deploy/.env.candidate
+          else
+            echo "Candidate HUIXIAO_TEST_ENV_FILE_OVERRIDE secret is empty or not configured."
+          fi
+
+          if [ -n "${HUIXIAO_TEST_ENV_FILE:-}" ]; then
+            printf '%s\n' "${HUIXIAO_TEST_ENV_FILE}" > deploy/.env.candidate
+            if validate_test_env deploy/.env.candidate "HUIXIAO_TEST_ENV_FILE secret"; then
+              activate_test_env deploy/.env.candidate "HUIXIAO_TEST_ENV_FILE secret"
+            fi
+            rm -f deploy/.env.candidate
+          else
+            echo "Candidate HUIXIAO_TEST_ENV_FILE secret is empty or not configured."
+          fi
+
+          candidate_env_paths=()
+          if [ -n "${HUIXIAO_TEST_ENV_PATH:-}" ]; then
+            candidate_env_paths+=("${HUIXIAO_TEST_ENV_PATH}")
+          fi
+          candidate_env_paths+=(
+            "/srv/huixiao-ai/huiyi/deploy/.env"
+            "/srv/huixiao-ai/deploy/.env"
+            "/srv/huiyi/deploy/.env"
+          )
+
+          for env_path in "${candidate_env_paths[@]}"; do
+            if [ -f "${env_path}" ]; then
+              cp "${env_path}" deploy/.env.candidate
+              if validate_test_env deploy/.env.candidate "${env_path}"; then
+                activate_test_env deploy/.env.candidate "${env_path}"
+              fi
+              rm -f deploy/.env.candidate
+            else
+              echo "Candidate env file not found: ${env_path}"
+            fi
+          done
+
+          echo "Missing test environment config. Provide HUIXIAO_TEST_ENV_PATH, HUIXIAO_TEST_ENV_FILE, or HUIXIAO_TEST_ENV_FILE_OVERRIDE." >&2
+          exit 1
+
+      - name: Build or start test services
+        run: |
+          set -euo pipefail
+          commit_message="$(git log -1 --pretty=%B)"
+          operation_count=0
+          operation=""
+
+          select_operation() {
+            marker="$1"
+            next_operation="$2"
+            if printf '%s\n' "${commit_message}" | grep -q "${marker}"; then
+              operation_count=$((operation_count + 1))
+              operation="${next_operation}"
+              echo "Matched deploy operation marker ${marker}: ${next_operation}"
+            fi
+          }
+
+          select_operation '\[stop-huiyi\]' stop-huiyi
+          select_operation '\[status-huiyi\]' status-huiyi
+          select_operation '\[rebuild-api-no-start\]' rebuild-api
+          select_operation '\[rebuild-asr-no-start\]' rebuild-asr
+          select_operation '\[rebuild-api-asr-no-start\]' rebuild-api-asr
+          select_operation '\[rebuild-start-api-asr\]' rebuild-start-api-asr
+          select_operation '\[rebuild-ai-no-start\]' rebuild-ai
+          select_operation '\[rebuild-funasr-no-start\]' rebuild-funasr
+          select_operation '\[rebuild-start-api\]' rebuild-start-api
+          select_operation '\[start-api\]' start-api
+          select_operation '\[start-huiyi\]' start-huiyi
+
+          if [ "${operation_count}" -gt 1 ]; then
+            echo "Refusing ambiguous deploy request: more than one deploy operation marker is present." >&2
+            echo "Use exactly one of: [stop-huiyi], [status-huiyi], [rebuild-api-no-start], [rebuild-asr-no-start], [rebuild-api-asr-no-start], [rebuild-start-api-asr], [rebuild-ai-no-start], [rebuild-funasr-no-start], [rebuild-start-api], [start-api], [start-huiyi]." >&2
+            exit 1
+          fi
+
+          case "${operation}" in
+            "")
+              echo "No deploy operation marker; validating config only. No Docker containers will be changed."
+              HUIXIAO_DEPLOY_ACTION=validate bash deploy/deploy.sh
+              ;;
+            stop-huiyi)
+              HUIXIAO_DEPLOY_ACTION=stop \
+                HUIXIAO_DEPLOY_STOP_SERVICES="api_server asr_service ai_service funasr_runtime" \
+                bash deploy/deploy.sh
+              ;;
+            status-huiyi)
+              HUIXIAO_DEPLOY_ACTION=status bash deploy/deploy.sh
+              ;;
+            rebuild-api)
+              HUIXIAO_DEPLOY_ACTION=build-create \
+                HUIXIAO_DEPLOY_BUILD_SERVICES=api_server \
+                bash deploy/deploy.sh
+              ;;
+            rebuild-asr)
+              HUIXIAO_DEPLOY_ACTION=build-create \
+                HUIXIAO_DEPLOY_BUILD_SERVICES=asr_service \
+                bash deploy/deploy.sh
+              ;;
+            rebuild-api-asr)
+              HUIXIAO_DEPLOY_ACTION=build-create \
+                HUIXIAO_DEPLOY_BUILD_SERVICES="api_server asr_service" \
+                bash deploy/deploy.sh
+              ;;
+            rebuild-start-api-asr)
+              HUIXIAO_DEPLOY_ACTION=build-create \
+                HUIXIAO_DEPLOY_BUILD_SERVICES="api_server asr_service" \
+                bash deploy/deploy.sh
+              HUIXIAO_DEPLOY_ACTION=start \
+                HUIXIAO_DEPLOY_UP_SERVICES="funasr_runtime asr_service ai_service api_server" \
+                HUIXIAO_DEPLOY_ALLOW_HEAVY_START=true \
+                HUIXIAO_DEPLOY_ALLOW_FULL_START=true \
+                bash deploy/deploy.sh
+              ;;
+            rebuild-ai)
+              HUIXIAO_DEPLOY_ACTION=build-create \
+                HUIXIAO_DEPLOY_BUILD_SERVICES=ai_service \
+                bash deploy/deploy.sh
+              ;;
+            rebuild-funasr)
+              HUIXIAO_DEPLOY_ACTION=build-create \
+                HUIXIAO_DEPLOY_BUILD_SERVICES=funasr_runtime \
+                bash deploy/deploy.sh
+              ;;
+            rebuild-start-api)
+              HUIXIAO_DEPLOY_ACTION=build-create \
+                HUIXIAO_DEPLOY_BUILD_SERVICES=api_server \
+                bash deploy/deploy.sh
+              HUIXIAO_DEPLOY_ACTION=start \
+                HUIXIAO_DEPLOY_UP_SERVICES="api_server" \
+                bash deploy/deploy.sh
+              ;;
+            start-api)
+              HUIXIAO_DEPLOY_ACTION=start \
+                HUIXIAO_DEPLOY_UP_SERVICES="api_server" \
+                bash deploy/deploy.sh
+              ;;
+            start-huiyi)
+              HUIXIAO_DEPLOY_ACTION=start \
+                HUIXIAO_DEPLOY_UP_SERVICES="funasr_runtime asr_service ai_service api_server" \
+                HUIXIAO_DEPLOY_ALLOW_HEAVY_START=true \
+                HUIXIAO_DEPLOY_ALLOW_FULL_START=true \
+                bash deploy/deploy.sh
+              ;;
+          esac

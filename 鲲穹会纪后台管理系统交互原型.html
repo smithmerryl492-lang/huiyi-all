@@ -1,0 +1,5241 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>鲲穹会纪内部运营后台 - 高保真原型</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --surface-muted: #f6f8fa;
+      --surface-subtle: #fbfcfd;
+      --surface-tint: #edf7f3;
+      --line: #dce4ec;
+      --line-strong: #c7d1dc;
+      --ink: #17202b;
+      --text: #2e3947;
+      --muted: #657384;
+      --weak: #9aa6b5;
+      --nav: #fbfcfd;
+      --nav-2: #f1f5f5;
+      --nav-line: #dce5ec;
+      --primary: #10746b;
+      --primary-dark: #0a5d56;
+      --primary-soft: #e8f4f1;
+      --primary-line: #a8d3cb;
+      --blue: #315f9f;
+      --blue-soft: #edf4ff;
+      --amber: #946217;
+      --amber-soft: #fff7e8;
+      --red: #b3261e;
+      --red-soft: #fff2f0;
+      --green: #0b7046;
+      --green-soft: #e9f6ef;
+      --shadow: 0 22px 60px rgba(31, 42, 61, 0.18);
+      --shadow-soft: 0 1px 2px rgba(31, 42, 61, 0.05);
+      --radius: 3px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      letter-spacing: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid rgba(16, 116, 107, 0.35);
+      outline-offset: 2px;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      background: var(--bg);
+    }
+
+    .sidebar {
+      min-width: 0;
+      background: var(--nav);
+      color: var(--text);
+      border-right: 1px solid var(--nav-line);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      min-height: 72px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--nav-line);
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      background: #eef5ff;
+      border: 1px solid #d9e6f7;
+      flex: 0 0 auto;
+    }
+
+    .brand-mark svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .brand-title {
+      min-width: 0;
+      line-height: 1.2;
+    }
+
+    .brand-title strong {
+      display: block;
+      font-size: 16px;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 760;
+    }
+
+    .brand-title span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav-section {
+      padding: 18px 18px 8px;
+      color: #7b8795;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .nav {
+      padding: 0 12px 14px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .nav button {
+      width: 100%;
+      border: 1px solid transparent;
+      min-height: 42px;
+      padding: 0 12px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      color: #4f5f70;
+      background: transparent;
+      text-align: left;
+      transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+    }
+
+    .nav button:hover {
+      color: var(--ink);
+      background: #f0f4f5;
+    }
+
+    .nav button.active {
+      color: #0d3f3b;
+      background: var(--primary-soft);
+      border-color: #d2e7e2;
+      box-shadow: inset 3px 0 0 var(--primary);
+      font-weight: 700;
+    }
+
+    .nav svg {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+    }
+
+    .main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      min-height: 72px;
+      padding: 0 32px;
+      background: rgba(255, 255, 255, 0.98);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 1px 0 rgba(31, 42, 61, 0.02);
+    }
+
+    .crumb {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .crumb h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 780;
+    }
+
+    .crumb span {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .workspace {
+      min-width: 0;
+      padding: 24px 28px 32px;
+      display: grid;
+      gap: 18px;
+    }
+
+    #viewRoot {
+      min-width: 0;
+      width: 100%;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .view-stack {
+      width: 100%;
+      min-width: 0;
+      display: grid;
+      gap: 18px;
+    }
+
+    .view-compact {
+      max-width: none;
+    }
+
+    .view-balanced {
+      max-width: none;
+    }
+
+    .button, .icon-btn, .text-btn, .primary-btn, .danger-btn {
+      border: 1px solid var(--line-strong);
+      min-height: 38px;
+      border-radius: var(--radius);
+      padding: 0 13px;
+      background: #ffffff;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      line-height: 1;
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .icon-btn {
+      width: 36px;
+      padding: 0;
+    }
+
+    .modal .icon-btn {
+      border-color: transparent;
+      color: var(--muted);
+      background: transparent;
+    }
+
+    .modal .icon-btn:hover {
+      color: var(--ink);
+      background: #eef2f4;
+      border-color: transparent;
+    }
+
+    .button svg, .icon-btn svg, .text-btn svg, .primary-btn svg, .danger-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .button:hover, .icon-btn:hover, .text-btn:hover {
+      border-color: #9aa8b6;
+      background: #f7f9fb;
+    }
+
+    .primary-btn {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .primary-btn:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 8px 18px rgba(16, 116, 107, 0.14);
+    }
+
+    .danger-btn {
+      border-color: #f0b8b2;
+      color: var(--red);
+      background: #ffffff;
+    }
+
+    .danger-btn:hover {
+      background: var(--red-soft);
+    }
+
+    .view-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 384px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: visible;
+      min-width: 0;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .panel-head {
+      min-height: 58px;
+      padding: 13px 16px 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: #fbfcfd;
+    }
+
+    .panel-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .panel-title {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .panel-title h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 760;
+      line-height: 1.3;
+    }
+
+    .panel-title span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .users-table { min-width: 860px; }
+    .finance-table { min-width: 620px; }
+    .pricing-table { min-width: 900px; }
+    .records-table { min-width: 1040px; }
+
+    .users-table col.col-user { width: 24%; }
+    .users-table col.col-phone { width: 17%; }
+    .users-table col.col-member { width: 12%; }
+    .users-table col.col-plan { width: 18%; }
+    .users-table col.col-status { width: 12%; }
+    .users-table col.col-action { width: 17%; }
+
+    .finance-table col.col-user { width: auto; }
+    .finance-table col.col-money { width: 168px; }
+    .finance-table col.col-plan { width: 150px; }
+    .finance-table col.col-status { width: 110px; }
+
+    .pricing-table col.col-plan { width: 24%; }
+    .pricing-table col.col-price { width: 120px; }
+    .pricing-table col.col-hours { width: 150px; }
+    .pricing-table col.col-qa { width: 170px; }
+    .pricing-table col.col-status { width: 110px; }
+    .pricing-table col.col-action { width: 150px; }
+
+    .records-table col.col-time { width: 154px; }
+    .records-table col.col-user { width: 190px; }
+    .records-table col.col-type { width: 138px; }
+    .records-table col.col-before { width: 190px; }
+    .records-table col.col-after { width: 210px; }
+    .records-table col.col-note { width: auto; }
+
+    .data-table th {
+      height: 40px;
+      padding: 0 16px;
+      text-align: left;
+      color: #596777;
+      background: var(--surface-muted);
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .data-table td {
+      height: 58px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #edf2f6;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+    }
+
+    .data-table td strong {
+      color: var(--ink);
+      font-weight: 740;
+    }
+
+    .data-table tr[data-id] {
+      cursor: pointer;
+    }
+
+    .data-table tbody tr:hover {
+      background: #f8fbfb;
+    }
+
+    .data-table tbody tr.selected {
+      background: var(--primary-soft);
+      box-shadow: inset 3px 0 0 var(--primary);
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .data-table th.money,
+    .data-table th.number,
+    .data-table td.money,
+    .data-table td.number {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .data-table th.action,
+    .data-table td.action {
+      text-align: right;
+    }
+
+    .data-table td.action .row-actions {
+      justify-content: flex-end;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      scrollbar-color: #aeb8c5 #eef2f6;
+      scrollbar-width: thin;
+    }
+
+    .table-footer {
+      min-height: 56px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 18px;
+      flex-wrap: wrap;
+    }
+
+    .pager-left,
+    .pager-right {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pager-right {
+      margin-left: auto;
+      justify-content: flex-end;
+    }
+
+    .pager-total,
+    .pager-jumper,
+    .pager-range {
+      color: #606f80;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .pager-range strong {
+      color: var(--ink);
+      font-weight: 760;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pager-size {
+      height: 32px;
+      min-width: 98px;
+      padding: 0 28px 0 10px;
+      border: 1px solid #d2dbe5;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(45deg, transparent 50%, #7b8795 50%),
+        linear-gradient(135deg, #7b8795 50%, transparent 50%),
+        #ffffff;
+      background-position:
+        calc(100% - 16px) 13px,
+        calc(100% - 11px) 13px,
+        0 0;
+      background-size: 5px 5px, 5px 5px, 100% 100%;
+      background-repeat: no-repeat;
+      color: var(--text);
+      appearance: none;
+      outline: 0;
+    }
+
+    .pager-size:hover,
+    .pager-jump-input:hover {
+      border-color: #a8b7c7;
+    }
+
+    .pager-size:focus,
+    .pager-jump-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 116, 107, 0.10);
+    }
+
+    .pager-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .pager-prev,
+    .pager-next,
+    .pager-page,
+    .pager-go {
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: #566475;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    }
+
+    .pager-page {
+      min-width: 32px;
+      padding: 0 8px;
+    }
+
+    .pager-prev:hover,
+    .pager-next:hover,
+    .pager-page:hover,
+    .pager-go:hover {
+      color: var(--ink);
+      background: #f1f5f8;
+      border-color: #d7e0e9;
+    }
+
+    .pager-page.active {
+      color: #ffffff;
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .pager-prev:disabled,
+    .pager-next:disabled {
+      cursor: not-allowed;
+      color: var(--weak);
+      background: transparent;
+      border-color: transparent;
+    }
+
+    .pager-ellipsis {
+      width: 24px;
+      height: 32px;
+      color: var(--weak);
+      display: inline-grid;
+      place-items: center;
+      font-weight: 700;
+    }
+
+    .pager-jump-input {
+      width: 52px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #d2dbe5;
+      border-radius: var(--radius);
+      background: #ffffff;
+      color: var(--text);
+      text-align: center;
+      outline: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .toolbar {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #fbfcfd;
+    }
+
+    .field {
+      min-height: 40px;
+      border: 1px solid #cdd7e1;
+      border-radius: var(--radius);
+      background: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      color: var(--muted);
+    }
+
+    .field span {
+      color: #546171;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .field input, .field select {
+      height: 38px;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .field input { width: 240px; }
+    .field select { min-width: 118px; }
+
+    .field:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 116, 107, 0.10);
+    }
+
+    .field:hover {
+      border-color: #b8c5d1;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .summary-item {
+      min-height: 82px;
+      padding: 14px 16px;
+      border-right: 1px solid var(--line);
+      display: grid;
+      align-content: center;
+      gap: 5px;
+    }
+
+    .summary-item:last-child { border-right: 0; }
+
+    .summary-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .summary-item strong {
+      color: var(--ink);
+      font-size: 21px;
+      line-height: 1.15;
+      font-weight: 780;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 380px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .detail-hero {
+      padding: 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .detail-hero h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .detail-hero p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .detail-actions {
+      padding: 16px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .record-list {
+      display: grid;
+    }
+
+    .record-list.scroll-area {
+      max-height: 276px;
+      overflow: auto;
+      scrollbar-color: #aeb8c5 #eef2f6;
+      scrollbar-width: thin;
+    }
+
+    .record-row {
+      min-height: 64px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #edf2f6;
+      display: grid;
+      grid-template-columns: 140px minmax(0, 1fr) 128px;
+      gap: 14px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .record-row:last-child { border-bottom: 0; }
+
+    .record-row strong {
+      color: var(--ink);
+      font-weight: 740;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .sub-text {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+
+    .badge {
+      min-height: 26px;
+      padding: 0 8px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #465364;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .badge.ok { color: var(--green); border-color: #c4e2d0; background: var(--green-soft); }
+    .badge.warn { color: var(--amber); border-color: #ead7b4; background: var(--amber-soft); }
+    .badge.off { color: #687386; border-color: #d7dde6; background: #f2f4f7; }
+    .badge.red { color: var(--red); border-color: #f0c0bb; background: var(--red-soft); }
+    .badge.blue { color: var(--blue); border-color: #cbd6f2; background: var(--blue-soft); }
+    .badge.teal { color: var(--primary); border-color: #b7ddd9; background: var(--primary-soft); }
+
+    .detail-rail {
+      position: sticky;
+      top: 96px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .rail-head {
+      padding: 18px 18px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      background: #fbfcfd;
+    }
+
+    .rail-head h3 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .rail-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .rail-section {
+      padding: 16px 18px;
+      border-bottom: 1px solid #edf1f5;
+    }
+
+    .rail-section:last-child { border-bottom: 0; }
+
+    .rail-section h4 {
+      margin: 0 0 12px;
+      color: #364152;
+      font-size: 13px;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 9px 10px;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .kv dt { color: var(--muted); }
+    .kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+    .inline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .money, .number {
+      font-variant-numeric: tabular-nums;
+      font-weight: 720;
+      color: var(--ink);
+    }
+
+    .muted { color: var(--muted); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      padding: 24px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(9, 15, 24, 0.54);
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(560px, 100%);
+      max-height: calc(100vh - 48px);
+      background: #ffffff;
+      border: 1px solid #cfd8e3;
+      border-radius: 4px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+
+    .modal.modal-narrow {
+      width: min(440px, 100%);
+    }
+
+    .modal.modal-wide {
+      width: min(680px, 100%);
+    }
+
+    .modal-head {
+      min-height: 64px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #fbfcfd;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 760;
+      line-height: 1.25;
+    }
+
+    .modal-body {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 16px;
+      overflow: auto;
+      background: #ffffff;
+    }
+
+    .modal-body.single-form {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-body.triple-form {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .form-item {
+      display: grid;
+      gap: 7px;
+    }
+
+    .form-item.full { grid-column: 1 / -1; }
+
+    .form-item label {
+      color: #344054;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .form-item input, .form-item select, .form-item textarea {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid #cdd7e1;
+      border-radius: var(--radius);
+      outline: 0;
+      background: #ffffff;
+      color: var(--text);
+      transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+    }
+
+    .form-item input:hover, .form-item select:hover, .form-item textarea:hover {
+      border-color: #aebbc8;
+    }
+
+    .form-item input::placeholder, .form-item textarea::placeholder {
+      color: #9aa6b5;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      margin: 0;
+      appearance: none;
+    }
+
+    input[type="number"] {
+      appearance: textfield;
+    }
+
+    .form-item select {
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #667085 50%),
+        linear-gradient(135deg, #667085 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 19px,
+        calc(100% - 13px) 19px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      padding-right: 34px;
+    }
+
+    .form-note {
+      grid-column: 1 / -1;
+      padding: 10px 12px;
+      border: 0;
+      border-left: 3px solid var(--primary);
+      border-radius: 0;
+      color: #315d59;
+      background: #f3faf8;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .form-note.warn {
+      border-color: #c8902f;
+      color: #7a4b10;
+      background: #fff8e8;
+    }
+
+    .check-line {
+      grid-column: 1 / -1;
+      min-height: 40px;
+      padding: 2px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .check-line input {
+      width: 16px;
+      height: 16px;
+      min-height: 0;
+      margin: 2px 0 0;
+      padding: 0;
+      flex: 0 0 auto;
+    }
+
+    .form-item textarea {
+      resize: vertical;
+      min-height: 96px;
+    }
+
+    .form-item input:focus, .form-item select:focus, .form-item textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 116, 107, 0.12);
+      background: #ffffff;
+    }
+
+    .modal-foot {
+      min-height: 62px;
+      padding: 12px 20px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfd;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 90;
+      min-width: 280px;
+      max-width: 420px;
+      display: none;
+      padding: 13px 15px;
+      border-radius: 4px;
+      background: #111827;
+      color: #ffffff;
+      box-shadow: var(--shadow);
+      font-size: 13px;
+    }
+
+    .toast.show {
+      display: block;
+      animation: toast-in 160ms ease-out;
+    }
+
+    @keyframes toast-in {
+      from { transform: translateY(8px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 1180px) {
+      .view-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-rail {
+        position: static;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+      }
+
+      .brand {
+        min-height: 56px;
+      }
+
+      .nav-section {
+        display: none;
+      }
+
+      .nav {
+        display: flex;
+        overflow-x: auto;
+        border-bottom: 1px solid var(--nav-line);
+        padding: 8px;
+        scrollbar-width: none;
+      }
+
+      .nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav button {
+        flex: 0 0 auto;
+        width: auto;
+        white-space: nowrap;
+      }
+
+      .topbar {
+        position: static;
+        min-height: auto;
+        padding: 16px 16px 0;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .workspace {
+        padding: 16px;
+      }
+
+      .toolbar {
+        gap: 8px;
+      }
+
+      .field {
+        width: 100%;
+      }
+
+      .field input {
+        width: 100%;
+      }
+
+      .field select {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .table-scroll {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .data-table {
+        min-width: 640px;
+      }
+
+      .finance-table {
+        min-width: 100%;
+      }
+
+      .finance-table col.col-money {
+        width: 96px;
+      }
+
+      .users-table { min-width: 820px; }
+      .pricing-table { min-width: 860px; }
+      .records-table { min-width: 980px; }
+
+      .data-table th,
+      .data-table td {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .table-footer {
+        justify-content: flex-start;
+      }
+
+      .pager-left,
+      .pager-right {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .pager-right {
+        margin-left: 0;
+      }
+
+      .pager-actions {
+        max-width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .pager-actions::-webkit-scrollbar {
+        display: none;
+      }
+
+      .modal-body {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-body.triple-form {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-strip,
+      .detail-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .summary-item:last-child {
+        border-bottom: 0;
+      }
+
+      .record-row {
+        grid-template-columns: 1fr;
+      }
+
+      .modal {
+        width: min(100%, 560px);
+      }
+
+      .modal-backdrop {
+        padding: 14px;
+      }
+
+      .modal-foot {
+        justify-content: stretch;
+      }
+
+      .modal-foot .text-btn,
+      .modal-foot .primary-btn {
+        flex: 1;
+      }
+    }
+
+    /* Component system v2: Element-style internal admin components */
+    :root {
+      --bg: #f3f5f8;
+      --surface: #ffffff;
+      --surface-muted: #f7f9fc;
+      --surface-subtle: #fbfcfe;
+      --line: #dcdfe6;
+      --line-strong: #c7ceda;
+      --ink: #1f2937;
+      --text: #344054;
+      --muted: #667085;
+      --weak: #98a2b3;
+      --nav: #fbfcfe;
+      --nav-line: #e1e6ef;
+      --primary: #1677ff;
+      --primary-dark: #0958d9;
+      --primary-soft: #eaf3ff;
+      --green: #0f7a45;
+      --green-soft: #ecfdf3;
+      --red: #d92d20;
+      --red-soft: #fff1f0;
+      --amber: #b76e00;
+      --amber-soft: #fff7e6;
+      --blue: #175cd3;
+      --blue-soft: #eff6ff;
+      --radius: 4px;
+      --shadow: 0 18px 46px rgba(16, 24, 40, 0.18);
+      --shadow-soft: 0 1px 2px rgba(16, 24, 40, 0.04);
+    }
+
+    html, body {
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .app-shell {
+      grid-template-columns: 240px minmax(0, 1fr);
+      background: var(--bg);
+    }
+
+    .sidebar {
+      background: var(--nav);
+      border-right: 1px solid var(--nav-line);
+    }
+
+    .brand {
+      min-height: 72px;
+      border-bottom: 1px solid var(--nav-line);
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
+      background: #eef5ff;
+      border-color: #d6e4ff;
+    }
+
+    .nav-section {
+      padding: 18px 20px 8px;
+      color: #7a8699;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .nav {
+      padding: 0 12px 16px;
+      gap: 4px;
+    }
+
+    .nav button {
+      min-height: 40px;
+      padding: 0 12px;
+      border-radius: 4px;
+      color: #475467;
+      font-size: 14px;
+      background: transparent;
+      border: 1px solid transparent;
+      box-shadow: none;
+    }
+
+    .nav button:hover {
+      background: #f2f6fb;
+      color: var(--ink);
+    }
+
+    .nav button.active {
+      color: #0958d9;
+      background: #eaf3ff;
+      border-color: #cfe3ff;
+      box-shadow: inset 3px 0 0 var(--primary);
+      font-weight: 700;
+    }
+
+    .topbar {
+      min-height: 72px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .crumb h1 {
+      color: var(--ink);
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .crumb span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .workspace {
+      padding: 24px 28px 36px;
+      gap: 18px;
+    }
+
+    #viewRoot,
+    .view-stack {
+      gap: 18px;
+    }
+
+    .view-grid {
+      grid-template-columns: minmax(0, 1fr) 384px;
+      gap: 18px;
+    }
+
+    @media (max-width: 1440px) {
+      .view-grid {
+        grid-template-columns: minmax(0, 1fr) 340px;
+      }
+    }
+
+    .panel,
+    .detail-rail,
+    .summary-strip {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .panel-head {
+      min-height: 64px;
+      padding: 14px 16px;
+      background: var(--surface-subtle);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .panel-title span {
+      margin-top: 2px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .button,
+    .icon-btn,
+    .text-btn,
+    .primary-btn,
+    .danger-btn {
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: 4px;
+      border: 1px solid #d0d5dd;
+      background: #ffffff;
+      color: #344054;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: none;
+      transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+    }
+
+    .icon-btn {
+      width: 36px;
+      padding: 0;
+    }
+
+    .button:hover,
+    .icon-btn:hover,
+    .text-btn:hover {
+      color: var(--primary);
+      border-color: #91caff;
+      background: #f5faff;
+    }
+
+    .primary-btn {
+      color: #ffffff;
+      background: var(--primary);
+      border-color: var(--primary);
+      font-weight: 700;
+    }
+
+    .primary-btn:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+      box-shadow: none;
+    }
+
+    .danger-btn {
+      color: var(--red);
+      border-color: #ffa39e;
+      background: #ffffff;
+    }
+
+    .danger-btn:hover {
+      color: #ffffff;
+      background: var(--red);
+      border-color: var(--red);
+    }
+
+    .toolbar {
+      padding: 14px 16px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+      gap: 12px;
+    }
+
+    .filter-bar {
+      min-height: 64px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-item {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .filter-item > span {
+      color: #344054;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .filter-select,
+    .filter-date {
+      height: 36px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      background: #ffffff;
+      color: var(--ink);
+      font-size: 14px;
+      outline: 0;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+
+    .filter-select {
+      min-width: 196px;
+      padding: 0 32px 0 10px;
+    }
+
+    .filter-date {
+      width: 150px;
+      padding: 0 10px;
+    }
+
+    .search-input {
+      width: 220px;
+    }
+
+    .date-filter {
+      position: relative;
+    }
+
+    .date-range-btn {
+      height: 36px;
+      min-width: 208px;
+      padding: 0 10px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      background: #ffffff;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+
+    .date-range-btn span {
+      min-width: 0;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 400;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .date-range-btn svg {
+      width: 16px;
+      height: 16px;
+      color: #667085;
+      flex: 0 0 auto;
+    }
+
+    .date-range-btn:hover,
+    .date-range-btn.active {
+      border-color: #98a2b3;
+      background: #fbfcfd;
+    }
+
+    .date-range-btn.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.12);
+    }
+
+    .date-popover {
+      position: absolute;
+      z-index: 50;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 336px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      background: #ffffff;
+      box-shadow: 0 12px 28px rgba(16, 24, 40, 0.14);
+    }
+
+    .date-filter.date-filter-right .date-popover {
+      right: 0;
+      left: auto;
+    }
+
+    .date-popover-head {
+      min-height: 44px;
+      padding: 0 10px;
+      border-bottom: 1px solid #edf2f6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .date-popover-head strong {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 760;
+    }
+
+    .date-jump-row {
+      min-height: 44px;
+      padding: 8px 10px;
+      border-bottom: 1px solid #edf2f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .date-jump-select {
+      height: 30px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      background: #ffffff;
+      color: var(--ink);
+      font-size: 13px;
+      outline: 0;
+    }
+
+    .date-jump-select.year {
+      width: 92px;
+    }
+
+    .date-jump-select.month {
+      width: 76px;
+    }
+
+    .calendar-panels {
+      max-height: 196px;
+      overflow-y: auto;
+      scrollbar-color: #aeb8c5 #eef2f6;
+      scrollbar-width: thin;
+    }
+
+    .calendar-panel {
+      width: 100%;
+    }
+
+    .calendar-panel + .calendar-panel {
+      border-top: 1px solid #edf2f6;
+    }
+
+    .calendar-month-title {
+      padding: 12px 12px 2px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 760;
+      text-align: center;
+    }
+
+    .calendar-nav {
+      width: 30px;
+      height: 30px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      color: #475467;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .calendar-nav:hover {
+      border-color: #d0d5dd;
+      background: #f8fafc;
+      color: var(--ink);
+    }
+
+    .calendar-nav svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      flex: 0 0 auto;
+    }
+
+    .calendar-week,
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .calendar-week {
+      padding: 8px 10px 4px;
+      color: #667085;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .calendar-grid {
+      padding: 0 10px 10px;
+      gap: 2px;
+    }
+
+    .calendar-day {
+      height: 34px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--text);
+      display: inline-grid;
+      place-items: center;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .calendar-day.outside {
+      color: #b0bac8;
+    }
+
+    .calendar-day.in-range {
+      background: #eef6ff;
+      color: #175cd3;
+    }
+
+    .calendar-day.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      font-weight: 760;
+    }
+
+    .calendar-day:hover {
+      border-color: #91caff;
+      background: #f5faff;
+      color: var(--primary);
+    }
+
+    .calendar-day.selected:hover {
+      color: #ffffff;
+      background: var(--primary);
+    }
+
+    .date-popover-foot {
+      min-height: 72px;
+      padding: 8px 10px 10px;
+      border-top: 1px solid #edf2f6;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .date-popover-foot .date-foot-actions {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .date-range-preview {
+      min-height: 18px;
+      color: #667085;
+      font-size: 12px;
+      line-height: 18px;
+      font-variant-numeric: tabular-nums;
+      overflow: visible;
+      white-space: nowrap;
+    }
+
+    .filter-select:hover,
+    .filter-date:hover {
+      border-color: #98a2b3;
+    }
+
+    .filter-select:focus,
+    .filter-date:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.12);
+    }
+
+    .filter-separator {
+      color: #98a2b3;
+      font-size: 13px;
+    }
+
+    .filter-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      min-height: 36px;
+      padding: 0 14px;
+    }
+
+    .field {
+      min-height: 40px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      background: #ffffff;
+      color: var(--muted);
+      padding: 0 12px;
+    }
+
+    .field span {
+      color: #475467;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .field input,
+    .field select {
+      height: 38px;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .field:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.12);
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      background: #ffffff;
+      scrollbar-color: #c4cdd9 #eef2f7;
+      scrollbar-width: thin;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .data-table th {
+      height: 44px;
+      padding: 0 16px;
+      text-align: left;
+      color: #475467;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      height: 60px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #edf1f6;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .data-table td strong {
+      display: block;
+      overflow: hidden;
+      color: var(--ink);
+      font-weight: 700;
+      text-overflow: ellipsis;
+    }
+
+    .data-table tbody tr:hover {
+      background: #f7fbff;
+    }
+
+    .data-table tbody tr.selected {
+      background: #eef6ff;
+      box-shadow: inset 3px 0 0 var(--primary);
+    }
+
+    .data-table th.money,
+    .data-table th.number,
+    .data-table td.money,
+    .data-table td.number {
+      text-align: right;
+    }
+
+    .data-table th.action,
+    .data-table td.action {
+      text-align: left;
+    }
+
+    .data-table td.action .row-actions {
+      justify-content: flex-start;
+    }
+
+    .users-table { min-width: 1040px; }
+    .users-table col.col-user { width: 220px; }
+    .users-table col.col-phone { width: 150px; }
+    .users-table col.col-member { width: 100px; }
+    .users-table col.col-plan { width: 140px; }
+    .users-table col.col-status { width: 100px; }
+    .users-table col.col-action { width: 124px; }
+
+    .finance-table { min-width: 760px; }
+    .finance-table col.col-user { width: 280px; }
+    .finance-table col.col-money { width: 150px; }
+
+    .pricing-table { min-width: 980px; }
+    .pricing-table col.col-plan { width: 200px; }
+    .pricing-table col.col-price { width: 120px; }
+    .pricing-table col.col-hours { width: 150px; }
+    .pricing-table col.col-qa { width: 170px; }
+    .pricing-table col.col-status { width: 110px; }
+    .pricing-table col.col-action { width: 210px; }
+
+    .records-table { min-width: 1120px; }
+    .records-table col.col-time { width: 160px; }
+    .records-table col.col-user { width: 190px; }
+    .records-table col.col-type { width: 140px; }
+    .records-table col.col-before { width: 170px; }
+    .records-table col.col-after { width: 210px; }
+    .records-table col.col-note { width: 210px; }
+
+    .row-actions {
+      flex-wrap: nowrap;
+      gap: 8px;
+    }
+
+    /* Table spacing v3: no filler column, proportional column rhythm */
+    .users-table col.col-user { width: 22%; }
+    .users-table col.col-phone { width: 16%; }
+    .users-table col.col-member { width: 10%; }
+    .users-table col.col-plan { width: 16%; }
+    .users-table col.col-status { width: 12%; }
+    .users-table col.col-action { width: 24%; }
+
+    .finance-table col.col-user { width: 38%; }
+    .finance-table col.col-money { width: 22%; }
+    .finance-table col.col-plan { width: 24%; }
+    .finance-table col.col-status { width: 16%; }
+
+    .pricing-table col.col-plan { width: 20%; }
+    .pricing-table col.col-price { width: 10%; }
+    .pricing-table col.col-hours { width: 16%; }
+    .pricing-table col.col-qa { width: 20%; }
+    .pricing-table col.col-status { width: 14%; }
+    .pricing-table col.col-action { width: 20%; }
+
+    .records-table col.col-time { width: 14%; }
+    .records-table col.col-user { width: 18%; }
+    .records-table col.col-type { width: 14%; }
+    .records-table col.col-before { width: 16%; }
+    .records-table col.col-after { width: 18%; }
+    .records-table col.col-note { width: 20%; }
+
+    /* Table rhythm v4: equalized business tables */
+    .pricing-table col.col-plan,
+    .pricing-table col.col-price,
+    .pricing-table col.col-hours,
+    .pricing-table col.col-qa,
+    .pricing-table col.col-status,
+    .pricing-table col.col-action {
+      width: 16.6667%;
+    }
+
+    .finance-table { min-width: 760px; }
+    .finance-table col.col-user { width: 38%; }
+    .finance-table col.col-money { width: 22%; }
+    .finance-table col.col-plan { width: 24%; }
+    .finance-table col.col-status { width: 16%; }
+
+    .orders-table { min-width: 960px; }
+    .orders-table col.col-order { width: 23%; }
+    .orders-table col.col-user { width: 21%; }
+    .orders-table col.col-plan { width: 13%; }
+    .orders-table col.col-money { width: 10%; }
+    .orders-table col.col-status { width: 10%; }
+    .orders-table col.col-time { width: 15%; }
+    .orders-table col.col-action { width: 8%; }
+
+    .dispatch-table { min-width: 960px; }
+    .dispatch-table col.col-user { width: 28%; }
+    .dispatch-table col.col-rule { width: 34%; }
+    .dispatch-table col.col-member { width: 18%; }
+    .dispatch-table col.col-status { width: 10%; }
+    .dispatch-table col.col-action { width: 10%; }
+
+    .batch-table { min-width: 1080px; }
+    .batch-table col.col-time { width: 15%; }
+    .batch-table col.col-type { width: 12%; }
+    .batch-table col.col-scope { width: 20%; }
+    .batch-table col.col-count { width: 10%; }
+    .batch-table col.col-content { width: 24%; }
+    .batch-table col.col-status { width: 9%; }
+    .batch-table col.col-note { width: 10%; }
+
+    .announcement-table { min-width: 960px; }
+    .announcement-table col.col-title { width: 28%; }
+    .announcement-table col.col-audience { width: 17%; }
+    .announcement-table col.col-status { width: 10%; }
+    .announcement-table col.col-date { width: 17%; }
+    .announcement-table col.col-read { width: 12%; }
+    .announcement-table col.col-action { width: 16%; }
+
+    .pricing-table th.money,
+    .pricing-table td.money {
+      text-align: left;
+    }
+
+    .finance-table th.money,
+    .finance-table td.money {
+      text-align: left;
+    }
+
+    .dispatch-tabs {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      background: #ffffff;
+      width: fit-content;
+    }
+
+    .dispatch-tab {
+      min-height: 32px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      color: #475467;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .dispatch-tab.active {
+      color: var(--primary);
+      background: #f5faff;
+      border-color: #91caff;
+    }
+
+    .dispatch-workspace {
+      display: grid;
+      grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
+      min-height: 520px;
+      background: #ffffff;
+    }
+
+    .dispatch-config {
+      min-width: 0;
+      padding: 16px;
+      border-right: 1px solid var(--line);
+      display: grid;
+      align-content: start;
+      gap: 16px;
+    }
+
+    .dispatch-config-head,
+    .dispatch-preview-head {
+      min-width: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .dispatch-config-title,
+    .dispatch-preview-title {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+    }
+
+    .dispatch-config-title h3,
+    .dispatch-preview-title h3 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 760;
+      line-height: 1.3;
+    }
+
+    .dispatch-config-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+
+    .dispatch-config .check-line {
+      grid-column: auto;
+      min-height: 44px;
+      padding: 22px 0 0;
+      align-items: center;
+    }
+
+    .dispatch-preview {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .dispatch-preview-head {
+      min-height: 64px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    .dispatch-preview-body {
+      min-width: 0;
+      display: grid;
+      align-content: start;
+    }
+
+    .dispatch-content-summary {
+      color: #475467;
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: right;
+    }
+
+    .dispatch-textarea {
+      width: 100%;
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .dispatch-wide {
+      grid-column: span 2;
+    }
+
+    .dispatch-full {
+      grid-column: 1 / -1;
+    }
+
+    .dispatch-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dispatch-empty {
+      padding: 18px 16px;
+      color: var(--muted);
+      border-top: 1px solid #edf1f6;
+      background: #fbfcfd;
+    }
+
+    .primary-btn:disabled,
+    .text-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+      box-shadow: none;
+    }
+
+    .dispatch-stepbar {
+      min-height: 48px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      background: #ffffff;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      overflow: hidden;
+    }
+
+    .dispatch-step {
+      min-width: 0;
+      min-height: 48px;
+      padding: 0 16px;
+      border: 0;
+      border-right: 1px solid #e4e7ec;
+      background: #ffffff;
+      color: #475467;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .dispatch-step:last-child {
+      border-right: 0;
+    }
+
+    .dispatch-step.active {
+      background: #f5faff;
+      color: var(--primary);
+      box-shadow: inset 0 -2px 0 var(--primary);
+    }
+
+    .dispatch-step-index {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #eef2f6;
+      color: #475467;
+      display: inline-grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .dispatch-step.active .dispatch-step-index {
+      color: #ffffff;
+      background: var(--primary);
+    }
+
+    .dispatch-step-text {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .dispatch-step-text strong {
+      color: inherit;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .dispatch-step-text span {
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dispatch-screen {
+      background: #ffffff;
+    }
+
+    .dispatch-screen-head {
+      min-height: 72px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: #ffffff;
+    }
+
+    .dispatch-screen-copy {
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .dispatch-screen-copy h3 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 760;
+      line-height: 1.3;
+    }
+
+    .dispatch-screen-actions {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dispatch-filter-grid {
+      min-height: 64px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: #ffffff;
+    }
+
+    .dispatch-filter-grid .filter-date[type="text"] {
+      width: 220px;
+    }
+
+    .dispatch-hidden {
+      display: none !important;
+    }
+
+    .dispatch-hint {
+      min-height: 40px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #edf2f6;
+      color: #475467;
+      background: #fbfcfd;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .dispatch-content-grid {
+      width: min(780px, 100%);
+      padding: 18px 16px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .dispatch-content-grid .form-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .dispatch-brief {
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1.3fr 1.3fr 0.7fr;
+      background: #ffffff;
+    }
+
+    .dispatch-brief div {
+      min-width: 0;
+      padding: 14px 16px;
+      border-right: 1px solid var(--line);
+      display: grid;
+      gap: 4px;
+    }
+
+    .dispatch-brief div:last-child {
+      border-right: 0;
+    }
+
+    .dispatch-brief span {
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .dispatch-brief strong {
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .pricing-table th.action,
+    .pricing-table td.action {
+      text-align: left;
+    }
+
+    /* Pagination v4: single professional control group */
+    .table-footer {
+      justify-content: flex-end;
+      gap: 0;
+    }
+
+    .pager-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+    .pager-left,
+    .pager-right {
+      display: contents;
+    }
+
+    .pager-total {
+      margin-right: 2px;
+    }
+
+    .pager-size {
+      margin-right: 8px;
+    }
+
+    .pager-actions {
+      gap: 4px;
+    }
+
+    .pager-jumper {
+      margin-left: 8px;
+    }
+
+    .pager-range {
+      display: none;
+    }
+
+    @media (max-width: 860px) {
+      .pager-bar {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+    }
+
+    .table-footer {
+      min-height: 58px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--line);
+      background: #ffffff;
+      align-items: center;
+    }
+
+    .pager-left,
+    .pager-right {
+      gap: 10px;
+    }
+
+    .pager-total,
+    .pager-jumper,
+    .pager-range {
+      color: #475467;
+      font-size: 13px;
+    }
+
+    .pager-size,
+    .pager-jump-input {
+      height: 32px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      background-color: #ffffff;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .pager-size:focus,
+    .pager-jump-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.12);
+    }
+
+    .pager-actions {
+      gap: 4px;
+    }
+
+    .pager-prev,
+    .pager-next,
+    .pager-page,
+    .pager-go {
+      height: 32px;
+      min-width: 32px;
+      padding: 0 10px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      background: #ffffff;
+      color: #475467;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .pager-prev:hover,
+    .pager-next:hover,
+    .pager-page:hover,
+    .pager-go:hover {
+      color: var(--primary);
+      background: #f5faff;
+      border-color: #91caff;
+    }
+
+    .pager-page.active {
+      color: #ffffff;
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .pager-prev:disabled,
+    .pager-next:disabled {
+      color: #98a2b3;
+      background: #ffffff;
+      border-color: transparent;
+    }
+
+    .summary-strip {
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .summary-item {
+      min-height: 86px;
+      padding: 16px 18px;
+      border-right: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    .summary-item span {
+      color: #667085;
+      font-size: 13px;
+    }
+
+    .summary-item strong {
+      color: var(--ink);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .badge {
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge.ok { color: var(--green); border-color: #abefc6; background: var(--green-soft); }
+    .badge.warn { color: var(--amber); border-color: #ffd591; background: var(--amber-soft); }
+    .badge.off { color: #667085; border-color: #d0d5dd; background: #f2f4f7; }
+    .badge.red { color: var(--red); border-color: #ffa39e; background: var(--red-soft); }
+    .badge.blue { color: var(--blue); border-color: #bfd7ff; background: var(--blue-soft); }
+    .badge.teal { color: var(--primary); border-color: #b7d9ff; background: var(--primary-soft); }
+
+    .sub-text {
+      max-width: 100%;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .detail-rail {
+      position: sticky;
+      top: 96px;
+      overflow: hidden;
+    }
+
+    .rail-head,
+    .detail-hero {
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .rail-section {
+      border-bottom: 1px solid #edf1f6;
+    }
+
+    .kv {
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 10px 12px;
+      font-size: 14px;
+    }
+
+    .record-row {
+      min-height: 64px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #edf1f6;
+      grid-template-columns: 170px minmax(0, 1fr) 96px;
+    }
+
+    .modal-backdrop {
+      background: rgba(15, 23, 42, 0.48);
+      backdrop-filter: none;
+    }
+
+    .modal {
+      border-radius: 6px;
+      border: 1px solid #d0d5dd;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-head,
+    .modal-foot {
+      background: #ffffff;
+      border-color: var(--line);
+    }
+
+    .modal-head h3 {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .modal-body {
+      background: #ffffff;
+      gap: 16px;
+    }
+
+    .form-item label {
+      color: #344054;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .form-item input,
+    .form-item select,
+    .form-item textarea {
+      min-height: 40px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .form-item input:focus,
+    .form-item select:focus,
+    .form-item textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.12);
+    }
+
+    .form-note {
+      border-left: 3px solid var(--primary);
+      background: #f5faff;
+      color: #174ea6;
+    }
+
+    .form-note.warn {
+      border-color: #faad14;
+      background: #fff7e6;
+      color: #874d00;
+    }
+
+    .toast {
+      border-radius: 4px;
+      background: #1f2937;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 1180px) {
+      .view-grid,
+      .detail-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-rail {
+        position: static;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        position: static;
+        padding: 16px;
+      }
+
+      .workspace {
+        padding: 16px;
+      }
+
+      .nav {
+        display: flex;
+        overflow-x: auto;
+        padding: 8px;
+      }
+
+      .nav button {
+        flex: 0 0 auto;
+        width: auto;
+      }
+
+      .field {
+        width: 100%;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+      }
+
+      .finance-table {
+        min-width: 560px;
+      }
+
+      .users-table { min-width: 900px; }
+      .pricing-table { min-width: 900px; }
+      .records-table { min-width: 1040px; }
+      .orders-table { min-width: 960px; }
+      .dispatch-table { min-width: 960px; }
+      .batch-table { min-width: 1080px; }
+      .announcement-table { min-width: 960px; }
+
+      .dispatch-workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .dispatch-config {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .dispatch-config-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dispatch-config .check-line,
+      .dispatch-wide,
+      .dispatch-full {
+        grid-column: 1;
+      }
+
+      .dispatch-config .check-line {
+        padding-top: 0;
+      }
+
+      .dispatch-stepbar,
+      .dispatch-brief {
+        grid-template-columns: 1fr;
+      }
+
+      .dispatch-step,
+      .dispatch-brief div {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .dispatch-step:last-child,
+      .dispatch-brief div:last-child {
+        border-bottom: 0;
+      }
+
+      .dispatch-screen-head {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .dispatch-screen-actions {
+        justify-content: flex-start;
+      }
+
+      .dispatch-content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dispatch-tabs {
+        width: 100%;
+      }
+
+      .dispatch-tab {
+        flex: 1;
+      }
+
+      .table-footer,
+      .pager-left,
+      .pager-right {
+        justify-content: flex-start;
+      }
+
+      .pager-left,
+      .pager-right {
+        width: 100%;
+      }
+
+      .pager-right {
+        margin-left: 0;
+      }
+
+      .summary-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .summary-item:last-child {
+        border-bottom: 0;
+      }
+
+      .modal-body,
+      .modal-body.triple-form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-detail" viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-record" viewBox="0 0 24 24"><path d="M5 5v14h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 16h7a4 4 0 1 0-3.2-6.4L10 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 8v4H6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="m21 8-9-5-9 5 9 5 9-5Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 8v8l9 5 9-5V8M12 13v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-price" viewBox="0 0 24 24"><path d="M20 12V8a2 2 0 0 0-2-2h-3.5a2 2 0 0 1-1.4-.58L11.7 4A2 2 0 0 0 10.3 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M16 17h5M18.5 14.5v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-order" viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v16l-3-1.7-2.7 1.7-2.6-1.7L8 21l-3-1.7V5a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 8h8M8 12h8M8 16h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 16V9M12 16V6M16 16v-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m9 12 2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M22 2 11 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="M4 13h3l10-5v10L7 13H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 13v5a2 2 0 0 0 2 2h1M19 9.5a3.5 3.5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M7 2v4M17 2v4M4 9h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevrons-left" viewBox="0 0 24 24"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevrons-right" viewBox="0 0 24 24"><path d="m6 17 5-5-5-5M13 17l5-5-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 32 32" role="img" aria-label="鲲穹会纪">
+            <path d="M6.6 18.5c5.9-7.8 12.6-8.7 18.8-4.9-1.8 5.4-6.4 8.9-11.8 8.9-2.4 0-4.8-.8-7-4Z" fill="#2f5bea"/>
+            <path d="M8 21.8c5.2 2 11.4 1.7 16.1-1.7-2 4.7-6.6 7.3-11.7 6.4-2.3-.4-4-1.8-4.4-4.7Z" fill="#0f9f8f"/>
+            <circle cx="20.3" cy="14.2" r="1.7" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <strong>鲲穹会纪</strong>
+          <span>内部运营后台</span>
+        </div>
+      </div>
+      <div class="nav-section">核心管理</div>
+      <nav class="nav" id="nav"></nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">
+          <h1 id="pageTitle">用户管理</h1>
+          <span id="pageDesc">基本信息、冻结、会员和当月套餐</span>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <div id="viewRoot"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">编辑</h3>
+        <button class="icon-btn" id="closeModal" title="关闭"><svg><use href="#i-close"/></svg></button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot">
+        <button class="text-btn" id="cancelModal">取消</button>
+        <button class="primary-btn" id="saveModal">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" aria-live="polite"></div>
+
+  <script>
+    const navItems = [
+      { id: "users", name: "用户管理", icon: "i-users", desc: "查找用户、冻结、会员和当月套餐" },
+      { id: "data", name: "数据查看", icon: "i-chart", desc: "查看账期内用户付费金额和套餐状态" },
+      { id: "orders", name: "订单查询", icon: "i-order", desc: "查询充值订单、支付状态和用户订单历史" },
+      { id: "dispatch", name: "发放中心", icon: "i-send", desc: "按套餐和时间筛选对象后统一发放" },
+      { id: "announcements", name: "公告管理", icon: "i-megaphone", desc: "发布和管理 App 站内公告" },
+      { id: "pricing", name: "套餐定价", icon: "i-price", desc: "修改套餐价格、配额和启用状态" },
+      { id: "changes", name: "变更记录", icon: "i-record", desc: "查看会员、冻结和套餐调整记录" }
+    ];
+
+    const plans = [
+      { id: "basic", name: "基础版", price: 19, hours: 10, qa: 200, enabled: true },
+      { id: "plus", name: "进阶版", price: 39, hours: 20, qa: 600, enabled: true },
+      { id: "pro", name: "专业版", price: 59, hours: 40, qa: 1200, enabled: true }
+    ];
+
+    const users = [
+      { id: "U1001", name: "江西六角星科技", phone: "19914596080", createdAt: "2026-05-18", status: "正常", member: "会员", memberExpire: "2026-07-08", monthPlanId: "plus", paidAmount: 39, freezeReason: "" },
+      { id: "U1002", name: "南昌高新区投促局", phone: "18600011223", createdAt: "2026-04-26", status: "正常", member: "会员", memberExpire: "2026-08-01", monthPlanId: "pro", paidAmount: 59, freezeReason: "" },
+      { id: "U1003", name: "华东项目管理中心", phone: "18893218812", createdAt: "2026-05-30", status: "正常", member: "会员", memberExpire: "2026-06-30", monthPlanId: "basic", paidAmount: 19, freezeReason: "" },
+      { id: "U1004", name: "科创园招商服务部", phone: "13922189021", createdAt: "2026-06-02", status: "冻结", member: "无会员", memberExpire: "-", monthPlanId: "basic", paidAmount: 0, freezeReason: "异常使用" },
+      { id: "U1005", name: "深圳供应链协作组", phone: "13345670098", createdAt: "2026-05-22", status: "正常", member: "会员", memberExpire: "2026-07-21", monthPlanId: "plus", paidAmount: 39, freezeReason: "" }
+    ];
+
+    const changeRecords = [
+      { time: "2026-06-14 16:30", userId: "U1004", type: "冻结用户", before: "正常", after: "冻结", note: "异常使用" },
+      { time: "2026-06-13 11:20", userId: "U1002", type: "更改当月套餐", before: "进阶版", after: "专业版", note: "仅影响此人本月套餐" },
+      { time: "2026-06-12 09:45", userId: "U1003", type: "赠送权益", before: "无会员 / -", after: "会员至 2026-06-30，问答 +200次", note: "人工补偿" }
+    ];
+
+    const dataStages = [
+      { id: "2026-06-01_2026-06-14", name: "2026-06-01 至 2026-06-14", start: "2026-06-01", end: "2026-06-14" },
+      { id: "2026-05", name: "2026-05 完整月", start: "2026-05-01", end: "2026-05-31" }
+    ];
+
+    const paymentRecords = [
+      { date: "2026-06-03", userId: "U1001", planId: "plus", amount: 39 },
+      { date: "2026-06-04", userId: "U1002", planId: "pro", amount: 59 },
+      { date: "2026-06-05", userId: "U1003", planId: "basic", amount: 19 },
+      { date: "2026-06-07", userId: "U1005", planId: "plus", amount: 39 },
+      { date: "2026-05-18", userId: "U1001", planId: "plus", amount: 39 },
+      { date: "2026-05-12", userId: "U1002", planId: "pro", amount: 59 },
+      { date: "2026-05-30", userId: "U1003", planId: "basic", amount: 19 },
+      { date: "2026-05-22", userId: "U1005", planId: "plus", amount: 39 }
+    ];
+
+    const orderRecords = [
+      { id: "KQ202606070015", channelNo: "wx_420000278920260607", paidAt: "2026-06-07 14:08", date: "2026-06-07", userId: "U1005", planId: "plus", amount: 39, status: "支付成功", channel: "微信支付" },
+      { id: "KQ202606050011", channelNo: "ali_20260605103812001", paidAt: "2026-06-05 10:38", date: "2026-06-05", userId: "U1003", planId: "basic", amount: 19, status: "支付成功", channel: "支付宝" },
+      { id: "KQ202606040008", channelNo: "wx_420000271120260604", paidAt: "2026-06-04 09:42", date: "2026-06-04", userId: "U1002", planId: "pro", amount: 59, status: "支付成功", channel: "微信支付" },
+      { id: "KQ202606030006", channelNo: "wx_420000270620260603", paidAt: "2026-06-03 20:16", date: "2026-06-03", userId: "U1001", planId: "plus", amount: 39, status: "支付成功", channel: "微信支付" },
+      { id: "KQ202606020004", channelNo: "-", paidAt: "-", date: "2026-06-02", userId: "U1004", planId: "basic", amount: 19, status: "支付失败", channel: "微信支付" },
+      { id: "KQ202605300021", channelNo: "wx_420000265220260530", paidAt: "2026-05-30 16:12", date: "2026-05-30", userId: "U1003", planId: "basic", amount: 19, status: "支付成功", channel: "微信支付" },
+      { id: "KQ202605220018", channelNo: "ali_20260522154133002", paidAt: "2026-05-22 15:41", date: "2026-05-22", userId: "U1005", planId: "plus", amount: 39, status: "支付成功", channel: "支付宝" },
+      { id: "KQ202605180014", channelNo: "wx_420000259920260518", paidAt: "2026-05-18 11:20", date: "2026-05-18", userId: "U1001", planId: "plus", amount: 39, status: "支付成功", channel: "微信支付" },
+      { id: "KQ202605120009", channelNo: "wx_420000252120260512", paidAt: "2026-05-12 09:18", date: "2026-05-12", userId: "U1002", planId: "pro", amount: 59, status: "已退款", channel: "微信支付" },
+      { id: "KQ202605100003", channelNo: "-", paidAt: "-", date: "2026-05-10", userId: "U1004", planId: "basic", amount: 19, status: "待支付", channel: "微信支付" }
+    ];
+
+    const dispatchBatches = [
+      { time: "2026-06-14 18:20", type: "权益发放", scope: "2026-05-01 至 2026-05-31 购买进阶版", count: 2, content: "会员 +7天，问答 +200次", reason: "套餐调整补偿", status: "已完成" },
+      { time: "2026-06-10 10:05", type: "权益发放", scope: "2026-06-01 前购买专业版", count: 1, content: "转写 +3小时，问答 +100次", reason: "套餐说明同步补偿", status: "已完成" }
+    ];
+
+    const announcements = [
+      { id: "A1003", title: "套餐权益调整说明", audience: "全部用户", status: "已发布", publishAt: "2026-06-14 18:20", expireAt: "2026-06-30", targetCount: 580, readCount: 326, pinned: true, content: "本次套餐权益调整后，已为受影响用户安排对应补偿。" },
+      { id: "A1002", title: "知识库问答能力维护通知", audience: "会员用户", status: "草稿", publishAt: "-", expireAt: "2026-06-25", targetCount: 0, readCount: 0, pinned: false, content: "维护期间知识库问答可能出现短暂延迟，会议转写和纪要生成不受影响。" },
+      { id: "A1001", title: "端午假期服务安排", audience: "全部用户", status: "已下线", publishAt: "2026-05-30 09:10", expireAt: "2026-06-11", targetCount: 412, readCount: 298, pinned: false, content: "假期期间客服响应时间可能延长，核心转写服务保持正常。" }
+    ];
+    const announcementAudiences = ["全部用户", "会员用户", "无会员用户"];
+
+    let currentView = "users";
+    let selectedUserId = "U1002";
+    let currentModal = null;
+    let modalContext = null;
+    let userKeyword = "";
+    let userStatusFilter = "全部";
+    let userMemberFilter = "全部";
+    let userPlanFilter = "全部";
+    let userCreatedStart = "";
+    let userCreatedEnd = "";
+    let userSort = "createdDesc";
+    let dataPeriodMode = "stage";
+    let selectedDataStageId = dataStages[0].id;
+    let customStartDate = dataStages[0].start;
+    let customEndDate = dataStages[0].end;
+    let dataKeyword = "";
+    let dataPlanFilter = "全部";
+    let dataStatusFilter = "全部";
+    let dataSort = "paidDesc";
+    let orderKeyword = "";
+    let orderPlanFilter = "全部";
+    let orderStatusFilter = "全部";
+    let orderStartDate = "";
+    let orderEndDate = "";
+    let orderSort = "paidAtDesc";
+    let dispatchTab = "create";
+    let dispatchStep = "audience";
+    let dispatchAudienceMode = "periodPurchase";
+    let dispatchFilterPlanId = "plus";
+    let dispatchFilterStartDate = "2026-05-01";
+    let dispatchFilterEndDate = "2026-05-31";
+    let dispatchFilterBeforeDate = "2026-06-01";
+    let dispatchFilterStatus = "正常";
+    let dispatchFilterKeyword = "";
+    let dispatchSort = "purchaseDesc";
+    let dispatchSourceLabel = "用户管理：当前筛选结果";
+    let dispatchUserIds = ["U1001", "U1002", "U1003", "U1005"];
+    let dispatchManualText = "";
+    let dispatchExcludeFrozen = true;
+    let dispatchType = "benefit";
+    let dispatchMemberDays = 7;
+    let dispatchHours = 0;
+    let dispatchQa = 200;
+    let dispatchReason = "套餐调整补偿";
+    let dispatchRecordKeyword = "";
+    let dispatchRecordTypeFilter = "全部";
+    let dispatchRecordStartDate = "";
+    let dispatchRecordEndDate = "";
+    let dispatchRecordSort = "timeDesc";
+    let announcementKeyword = "";
+    let announcementStatusFilter = "全部";
+    let announcementAudienceFilter = "全部";
+    let announcementSort = "publishDesc";
+    let changeKeyword = "";
+    let changeTypeFilter = "全部";
+    let changeStartDate = "";
+    let changeEndDate = "";
+    let changeSort = "timeDesc";
+    let activeDatePickerKey = "";
+    let activeDatePickerMode = "range";
+    let draftRangeStart = "";
+    let draftRangeEnd = "";
+    let draftSingleDate = "";
+    let datePickerMonth = "2026-06-01";
+    const tablePageSizes = { users: 5, data: 5, orders: 5, announcements: 5, changes: 5, dispatchUsers: 5, dispatchRecords: 5 };
+    const tablePages = { users: 1, data: 1, orders: 1, announcements: 1, changes: 1, dispatchUsers: 1, dispatchRecords: 1 };
+
+    const root = document.getElementById("viewRoot");
+    const pageTitle = document.getElementById("pageTitle");
+    const pageDesc = document.getElementById("pageDesc");
+    const toast = document.getElementById("toast");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modal = document.querySelector(".modal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+
+    function svg(id) {
+      return `<svg><use href="#${id}"></use></svg>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function money(value) {
+      return `¥${Number(value).toLocaleString("zh-CN", { maximumFractionDigits: 2 })}`;
+    }
+
+    function planById(id) {
+      return plans.find(plan => plan.id === id) || plans[0];
+    }
+
+    function userById(id) {
+      return users.find(user => user.id === id);
+    }
+
+    function selectedUser() {
+      return userById(selectedUserId) || users[0];
+    }
+
+    function userName(id) {
+      return userById(id)?.name || id;
+    }
+
+    function selectedDataStage() {
+      return dataStages.find(stage => stage.id === selectedDataStageId) || dataStages[0];
+    }
+
+    function periodLabel(start, end) {
+      if (start && end) return `${start} 至 ${end}`;
+      if (start) return `${start} 起`;
+      if (end) return `${end} 前`;
+      return "全部账期";
+    }
+
+    function currentDataPeriod() {
+      if (dataPeriodMode === "all") {
+        return { mode: "all", label: "全部账期", start: "", end: "" };
+      }
+      if (dataPeriodMode === "custom") {
+        return { mode: "custom", label: periodLabel(customStartDate, customEndDate), start: customStartDate, end: customEndDate };
+      }
+      const stage = selectedDataStage();
+      return { mode: "stage", label: stage.name, start: stage.start, end: stage.end };
+    }
+
+    function dateInRange(date, start, end) {
+      if (start && date < start) return false;
+      if (end && date > end) return false;
+      return true;
+    }
+
+    function formatDateValue(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function monthFromDate(dateValue) {
+      const value = dateValue || "2026-06-01";
+      return `${value.slice(0, 7)}-01`;
+    }
+
+    function addMonths(monthValue, delta) {
+      const [year, month] = monthValue.split("-").map(Number);
+      return formatDateValue(new Date(year, month - 1 + delta, 1));
+    }
+
+    function monthTitle(monthValue) {
+      const [year, month] = monthValue.split("-").map(Number);
+      return `${year}年${String(month).padStart(2, "0")}月`;
+    }
+
+    function dateRangeText(start, end, emptyText = "全部时间") {
+      if (start && end) return `${start} 至 ${end}`;
+      if (start) return `${start} 起`;
+      if (end) return `${end} 前`;
+      return emptyText;
+    }
+
+    function datePickerLabel(start, end, mode = "range") {
+      if (mode === "single") return start || "选择日期";
+      return dateRangeText(start, end);
+    }
+
+    function optionItems(items, selectedValue) {
+      return items.map(item => `<option value="${item.value}" ${selectedValue === item.value ? "selected" : ""}>${item.label}</option>`).join("");
+    }
+
+    function sortControl(id, selectedValue, items) {
+      return `
+        <label class="filter-item">
+          <span>排序</span>
+          <select class="filter-select" id="${id}">${optionItems(items, selectedValue)}</select>
+        </label>
+      `;
+    }
+
+    function compareBasic(a, b, desc = false) {
+      if (a === b) return 0;
+      const result = a > b ? 1 : -1;
+      return desc ? -result : result;
+    }
+
+    function compareText(a, b, desc = false) {
+      const result = String(a || "").localeCompare(String(b || ""), "zh-CN");
+      return desc ? -result : result;
+    }
+
+    function compareNumber(a, b, desc = false) {
+      return compareBasic(Number(a) || 0, Number(b) || 0, desc);
+    }
+
+    function compareDateText(a, b, desc = false) {
+      return compareBasic(String(a || ""), String(b || ""), desc);
+    }
+
+    function datePickerYearOptions() {
+      const currentYear = Number(datePickerMonth.slice(0, 4)) || 2026;
+      const start = currentYear - 2;
+      return Array.from({ length: 6 }, (_, index) => start + index)
+        .map(year => `<option value="${year}" ${year === currentYear ? "selected" : ""}>${year}</option>`)
+        .join("");
+    }
+
+    function datePickerMonthOptions() {
+      const currentMonth = Number(datePickerMonth.slice(5, 7)) || 1;
+      return Array.from({ length: 12 }, (_, index) => index + 1)
+        .map(month => `<option value="${month}" ${month === currentMonth ? "selected" : ""}>${month}月</option>`)
+        .join("");
+    }
+
+    function setDatePickerYear(year) {
+      const month = datePickerMonth.slice(5, 7);
+      datePickerMonth = `${year}-${month}-01`;
+      renderCurrentView();
+    }
+
+    function setDatePickerMonthNumber(month) {
+      const year = datePickerMonth.slice(0, 4);
+      datePickerMonth = `${year}-${String(month).padStart(2, "0")}-01`;
+      renderCurrentView();
+    }
+
+    function syncFilterInputsFromDom() {
+      if (document.getElementById("userKeyword")) {
+        userKeyword = document.getElementById("userKeyword")?.value.trim() || "";
+        userStatusFilter = document.getElementById("statusFilter")?.value || "全部";
+        userMemberFilter = document.getElementById("memberFilter")?.value || "全部";
+        userPlanFilter = document.getElementById("userPlanFilter")?.value || "全部";
+        userSort = document.getElementById("userSort")?.value || userSort;
+      }
+      if (document.getElementById("dataKeyword")) {
+        dataKeyword = document.getElementById("dataKeyword")?.value.trim() || "";
+        dataPlanFilter = document.getElementById("dataPlanFilter")?.value || "全部";
+        dataStatusFilter = document.getElementById("dataStatusFilter")?.value || "全部";
+        dataSort = document.getElementById("dataSort")?.value || dataSort;
+      }
+      if (document.getElementById("orderKeyword")) {
+        orderKeyword = document.getElementById("orderKeyword")?.value.trim() || "";
+        orderPlanFilter = document.getElementById("orderPlanFilter")?.value || "全部";
+        orderStatusFilter = document.getElementById("orderStatusFilter")?.value || "全部";
+        orderSort = document.getElementById("orderSort")?.value || orderSort;
+      }
+      if (document.getElementById("dispatchAudienceMode")) {
+        dispatchAudienceMode = document.getElementById("dispatchAudienceMode")?.value || dispatchAudienceMode;
+        dispatchFilterPlanId = document.getElementById("dispatchFilterPlanId")?.value || dispatchFilterPlanId;
+        dispatchFilterStatus = document.getElementById("dispatchFilterStatus")?.value || dispatchFilterStatus;
+        dispatchFilterKeyword = document.getElementById("dispatchFilterKeyword")?.value || dispatchFilterKeyword;
+        dispatchSort = document.getElementById("dispatchSort")?.value || dispatchSort;
+      }
+      if (document.getElementById("dispatchRecordKeyword")) {
+        dispatchRecordKeyword = document.getElementById("dispatchRecordKeyword")?.value.trim() || "";
+        dispatchRecordTypeFilter = document.getElementById("dispatchRecordTypeFilter")?.value || "全部";
+        dispatchRecordSort = document.getElementById("dispatchRecordSort")?.value || dispatchRecordSort;
+      }
+      if (document.getElementById("changeKeyword")) {
+        changeKeyword = document.getElementById("changeKeyword")?.value.trim() || "";
+        changeTypeFilter = document.getElementById("changeTypeFilter")?.value || "全部";
+        changeSort = document.getElementById("changeSort")?.value || changeSort;
+      }
+    }
+
+    function openDateRangePicker(key, start, end) {
+      syncFilterInputsFromDom();
+      activeDatePickerKey = key;
+      activeDatePickerMode = "range";
+      draftRangeStart = start || "";
+      draftRangeEnd = end || "";
+      datePickerMonth = monthFromDate(start || end || datePickerMonth);
+      renderCurrentView();
+    }
+
+    function openDateSinglePicker(key, value) {
+      syncFilterInputsFromDom();
+      activeDatePickerKey = key;
+      activeDatePickerMode = "single";
+      draftSingleDate = value || "";
+      datePickerMonth = monthFromDate(value || datePickerMonth);
+      renderCurrentView();
+    }
+
+    function setDatePickerMonth(delta) {
+      datePickerMonth = addMonths(datePickerMonth, delta);
+      renderCurrentView();
+    }
+
+    function selectDateInPicker(dateValue) {
+      if (activeDatePickerMode === "single") {
+        draftSingleDate = dateValue;
+        datePickerMonth = monthFromDate(dateValue);
+        renderCurrentView();
+        return;
+      }
+      if (!draftRangeStart || (draftRangeStart && draftRangeEnd)) {
+        draftRangeStart = dateValue;
+        draftRangeEnd = "";
+      } else if (dateValue < draftRangeStart) {
+        draftRangeEnd = draftRangeStart;
+        draftRangeStart = dateValue;
+      } else {
+        draftRangeEnd = dateValue;
+      }
+      datePickerMonth = monthFromDate(dateValue);
+      renderCurrentView();
+    }
+
+    function resetPageForDatePicker(key) {
+      if (key === "userCreated") tablePages.users = 1;
+      if (key === "dataPeriod") tablePages.data = 1;
+      if (key === "orders") tablePages.orders = 1;
+      if (key === "dispatchPurchase" || key === "dispatchBefore") tablePages.dispatchUsers = 1;
+      if (key === "dispatchRecords") tablePages.dispatchRecords = 1;
+      if (key === "changes") tablePages.changes = 1;
+    }
+
+    function applyDatePicker() {
+      if (activeDatePickerMode === "single") {
+        if (activeDatePickerKey === "dispatchBefore") dispatchFilterBeforeDate = draftSingleDate;
+      } else {
+        if (activeDatePickerKey === "userCreated") {
+          userCreatedStart = draftRangeStart;
+          userCreatedEnd = draftRangeEnd;
+        }
+        if (activeDatePickerKey === "dataPeriod") {
+          customStartDate = draftRangeStart;
+          customEndDate = draftRangeEnd;
+        }
+        if (activeDatePickerKey === "orders") {
+          orderStartDate = draftRangeStart;
+          orderEndDate = draftRangeEnd;
+        }
+        if (activeDatePickerKey === "dispatchPurchase") {
+          dispatchFilterStartDate = draftRangeStart;
+          dispatchFilterEndDate = draftRangeEnd;
+        }
+        if (activeDatePickerKey === "dispatchRecords") {
+          dispatchRecordStartDate = draftRangeStart;
+          dispatchRecordEndDate = draftRangeEnd;
+        }
+        if (activeDatePickerKey === "changes") {
+          changeStartDate = draftRangeStart;
+          changeEndDate = draftRangeEnd;
+        }
+      }
+      resetPageForDatePicker(activeDatePickerKey);
+      activeDatePickerKey = "";
+      renderCurrentView();
+    }
+
+    function clearDatePicker() {
+      if (activeDatePickerMode === "single") {
+        draftSingleDate = "";
+      } else {
+        draftRangeStart = "";
+        draftRangeEnd = "";
+      }
+      applyDatePicker();
+    }
+
+    function cancelDatePicker() {
+      activeDatePickerKey = "";
+      renderCurrentView();
+    }
+
+    function calendarDayClass(dateValue, isOutside) {
+      const selected = activeDatePickerMode === "single"
+        ? dateValue === draftSingleDate
+        : dateValue === draftRangeStart || dateValue === draftRangeEnd;
+      const inRange = activeDatePickerMode === "range" && draftRangeStart && draftRangeEnd && dateValue > draftRangeStart && dateValue < draftRangeEnd;
+      return ["calendar-day", isOutside ? "outside" : "", selected ? "selected" : "", inRange ? "in-range" : ""].filter(Boolean).join(" ");
+    }
+
+    function renderCalendarMonth(monthValue) {
+      const [year, month] = monthValue.split("-").map(Number);
+      const firstDay = new Date(year, month - 1, 1).getDay();
+      const daysInCurrent = new Date(year, month, 0).getDate();
+      const daysInPrev = new Date(year, month - 1, 0).getDate();
+      const cells = Array.from({ length: 42 }, (_, index) => {
+        const dayNumber = index - firstDay + 1;
+        let cellYear = year;
+        let cellMonth = month;
+        let cellDay = dayNumber;
+        let outside = false;
+        if (dayNumber <= 0) {
+          outside = true;
+          cellMonth = month - 1;
+          if (cellMonth === 0) {
+            cellMonth = 12;
+            cellYear -= 1;
+          }
+          cellDay = daysInPrev + dayNumber;
+        } else if (dayNumber > daysInCurrent) {
+          outside = true;
+          cellMonth = month + 1;
+          if (cellMonth === 13) {
+            cellMonth = 1;
+            cellYear += 1;
+          }
+          cellDay = dayNumber - daysInCurrent;
+        }
+        const dateValue = `${cellYear}-${String(cellMonth).padStart(2, "0")}-${String(cellDay).padStart(2, "0")}`;
+        return `<button type="button" class="${calendarDayClass(dateValue, outside)}" onclick="event.stopPropagation(); selectDateInPicker('${dateValue}')">${cellDay}</button>`;
+      }).join("");
+      return `
+        <div class="calendar-panel">
+          <div class="calendar-month-title">${monthTitle(monthValue)}</div>
+          <div class="calendar-week"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+          <div class="calendar-grid">${cells}</div>
+        </div>
+      `;
+    }
+
+    function renderDatePicker(key) {
+      if (activeDatePickerKey !== key) return "";
+      const visibleMonthCount = activeDatePickerMode === "range" ? 6 : 3;
+      const calendars = Array.from({ length: visibleMonthCount }, (_, index) => renderCalendarMonth(addMonths(datePickerMonth, index))).join("");
+      const rangeText = activeDatePickerMode === "single"
+        ? datePickerLabel(draftSingleDate, "", "single")
+        : dateRangeText(draftRangeStart, draftRangeEnd, "请选择日期范围");
+      return `
+        <div class="date-popover" onclick="event.stopPropagation()">
+          <div class="date-popover-head">
+            <button type="button" class="calendar-nav" onclick="event.stopPropagation(); setDatePickerMonth(-1)">${svg("i-chevron-left")}</button>
+            <strong>${monthTitle(datePickerMonth)}</strong>
+            <button type="button" class="calendar-nav" onclick="event.stopPropagation(); setDatePickerMonth(1)">${svg("i-chevron-right")}</button>
+          </div>
+          <div class="date-jump-row">
+            <select class="date-jump-select year" onchange="event.stopPropagation(); setDatePickerYear(this.value)">${datePickerYearOptions()}</select>
+            <select class="date-jump-select month" onchange="event.stopPropagation(); setDatePickerMonthNumber(this.value)">${datePickerMonthOptions()}</select>
+          </div>
+          <div class="calendar-panels">${calendars}</div>
+          <div class="date-popover-foot">
+            <div class="date-range-preview">${rangeText}</div>
+            <div class="date-foot-actions">
+              <button type="button" class="text-btn" onclick="event.stopPropagation(); clearDatePicker()">清空</button>
+              <button type="button" class="text-btn" onclick="event.stopPropagation(); cancelDatePicker()">取消</button>
+              <button type="button" class="primary-btn" onclick="event.stopPropagation(); applyDatePicker()">确定</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function datePickerAlignClass(key) {
+      return ["dispatchPurchase", "dispatchBefore", "dispatchRecords", "changes"].includes(key) ? " date-filter-right" : "";
+    }
+
+    function dateRangeControl(key, label, start, end) {
+      const active = activeDatePickerKey === key ? "active" : "";
+      return `
+        <div class="filter-item date-filter${datePickerAlignClass(key)}">
+          <span>${label}</span>
+          <button type="button" class="date-range-btn ${active}" aria-haspopup="dialog" onclick="event.stopPropagation(); openDateRangePicker('${key}', '${start || ""}', '${end || ""}')">
+            <span>${datePickerLabel(start, end)}</span>${svg("i-calendar")}
+          </button>
+          ${renderDatePicker(key)}
+        </div>
+      `;
+    }
+
+    function dateSingleControl(key, label, value) {
+      const active = activeDatePickerKey === key ? "active" : "";
+      return `
+        <div class="filter-item date-filter${datePickerAlignClass(key)}">
+          <span>${label}</span>
+          <button type="button" class="date-range-btn ${active}" aria-haspopup="dialog" onclick="event.stopPropagation(); openDateSinglePicker('${key}', '${value || ""}')">
+            <span>${datePickerLabel(value, "", "single")}</span>${svg("i-calendar")}
+          </button>
+          ${renderDatePicker(key)}
+        </div>
+      `;
+    }
+
+    function recordsInPeriod(records, period = currentDataPeriod()) {
+      if (period.mode === "all") return records;
+      return records.filter(record => dateInRange(record.date, period.start, period.end));
+    }
+
+    function userPeriodPaidAmount(userId, period = currentDataPeriod()) {
+      return recordsInPeriod(paymentRecords, period)
+        .filter(record => record.userId === userId)
+        .reduce((sum, record) => sum + Number(record.amount), 0);
+    }
+
+    function totalPaid(period = currentDataPeriod()) {
+      return users.reduce((sum, user) => sum + userPeriodPaidAmount(user.id, period), 0);
+    }
+
+    function uniqueUsers(list) {
+      const seen = new Set();
+      return list.filter(user => {
+        if (!user || seen.has(user.id)) return false;
+        seen.add(user.id);
+        return true;
+      });
+    }
+
+    function parseManualUsers(text) {
+      const tokens = text.split(/[\s,，;；]+/).map(item => item.trim()).filter(Boolean);
+      return uniqueUsers(tokens.map(token => users.find(user => [user.id, user.phone, user.name].includes(token))).filter(Boolean));
+    }
+
+    function dispatchPlanName() {
+      return dispatchFilterPlanId === "all" ? "全部套餐" : planById(dispatchFilterPlanId).name;
+    }
+
+    function planSelectOptions(selectedId, includeAll = true) {
+      return `${includeAll ? `<option value="all" ${selectedId === "all" ? "selected" : ""}>全部套餐</option>` : ""}${plans.map(plan => `<option value="${plan.id}" ${selectedId === plan.id ? "selected" : ""}>${plan.name}</option>`).join("")}`;
+    }
+
+    function allPlanSelectOptions(selectedValue = "全部") {
+      return `<option value="全部" ${selectedValue === "全部" ? "selected" : ""}>全部套餐</option>${plans.map(plan => `<option value="${plan.id}" ${selectedValue === plan.id ? "selected" : ""}>${plan.name}</option>`).join("")}`;
+    }
+
+    function userMatchesKeyword(user, keyword) {
+      const value = String(keyword || "").trim().toLowerCase();
+      if (!value) return true;
+      return [user.id, user.name, user.phone].some(item => String(item).toLowerCase().includes(value));
+    }
+
+    function recordDate(value) {
+      return String(value || "").slice(0, 10);
+    }
+
+    function uniqueValues(items) {
+      return [...new Set(items.filter(Boolean))];
+    }
+
+    function paymentMatchesPlan(record) {
+      return dispatchFilterPlanId === "all" || record.planId === dispatchFilterPlanId;
+    }
+
+    function userPlanPayments(user, start = "", end = "") {
+      return paymentRecords
+        .filter(record => record.userId === user.id && paymentMatchesPlan(record) && dateInRange(record.date, start, end))
+        .sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    function latestUserPlanPayment(user, start = "", end = "") {
+      return userPlanPayments(user, start, end)[0] || null;
+    }
+
+    function userPassesDispatchStatus(user) {
+      return dispatchFilterStatus === "全部" || user.status === dispatchFilterStatus;
+    }
+
+    function userPassesDispatchKeyword(user) {
+      const keyword = dispatchFilterKeyword.trim().toLowerCase();
+      if (!keyword) return true;
+      return [user.id, user.name, user.phone].some(value => String(value).toLowerCase().includes(keyword));
+    }
+
+    function dispatchBaseUsers() {
+      if (dispatchAudienceMode === "currentList") {
+        return dispatchUserIds.map(userById).filter(Boolean);
+      }
+      if (dispatchAudienceMode === "currentPlan") {
+        return users.filter(user => dispatchFilterPlanId === "all" || user.monthPlanId === dispatchFilterPlanId);
+      }
+      if (dispatchAudienceMode === "beforePurchase") {
+        return users.filter(user => Boolean(latestUserPlanPayment(user, "", dispatchFilterBeforeDate)));
+      }
+      return users.filter(user => Boolean(latestUserPlanPayment(user, dispatchFilterStartDate, dispatchFilterEndDate)));
+    }
+
+    function dispatchRecipients() {
+      const base = uniqueUsers(dispatchBaseUsers());
+      return sortDispatchRecipients(base.filter(user => userPassesDispatchStatus(user) && userPassesDispatchKeyword(user)));
+    }
+
+    function dispatchAudienceLabel() {
+      const planName = dispatchPlanName();
+      if (dispatchAudienceMode === "currentList") return dispatchSourceLabel;
+      if (dispatchAudienceMode === "currentPlan") return `当前套餐为${planName}`;
+      if (dispatchAudienceMode === "beforePurchase") return `${dispatchFilterBeforeDate || "指定日期"} 前购买过${planName}`;
+      return `${periodLabel(dispatchFilterStartDate, dispatchFilterEndDate)} 购买过${planName}`;
+    }
+
+    function dispatchAudienceModeLabel() {
+      if (dispatchAudienceMode === "currentList") return "当前名单";
+      if (dispatchAudienceMode === "currentPlan") return "当前套餐";
+      if (dispatchAudienceMode === "beforePurchase") return "某日期前购买";
+      return "某时间段购买";
+    }
+
+    function dispatchMatchText(user) {
+      if (dispatchAudienceMode === "currentList") return dispatchSourceLabel;
+      if (dispatchAudienceMode === "currentPlan") return `当前套餐：${planById(user.monthPlanId).name}`;
+      const record = dispatchAudienceMode === "beforePurchase"
+        ? latestUserPlanPayment(user, "", dispatchFilterBeforeDate)
+        : latestUserPlanPayment(user, dispatchFilterStartDate, dispatchFilterEndDate);
+      return record ? `${record.date} 购买${planById(record.planId).name}` : "-";
+    }
+
+    function dispatchContentText() {
+      if (dispatchType === "member") return `会员 +${Math.max(1, Number(dispatchMemberDays) || 1)}天`;
+      if (dispatchType === "quota") return `转写 +${Math.max(0, Number(dispatchHours) || 0)}小时，问答 +${Math.max(0, Number(dispatchQa) || 0)}次`;
+      return `会员 +${Math.max(1, Number(dispatchMemberDays) || 1)}天，转写 +${Math.max(0, Number(dispatchHours) || 0)}小时，问答 +${Math.max(0, Number(dispatchQa) || 0)}次`;
+    }
+
+    function setDispatchList(ids, label, options = {}) {
+      dispatchUserIds = [...new Set(ids)].filter(id => userById(id));
+      dispatchSourceLabel = label;
+      dispatchAudienceMode = "currentList";
+      dispatchStep = "audience";
+      dispatchFilterStatus = options.excludeFrozen ? "正常" : "全部";
+      if (typeof options.excludeFrozen === "boolean") {
+        dispatchExcludeFrozen = options.excludeFrozen;
+      }
+      dispatchTab = "create";
+      tablePages.dispatchUsers = 1;
+      currentView = "dispatch";
+      renderApp();
+      showToast(`已加入 ${dispatchUserIds.length} 个用户到发放名单`);
+    }
+
+    function startDispatchFromUsers() {
+      const list = filteredUsers();
+      setDispatchList(
+        list.map(user => user.id),
+        `用户管理：${userStatusFilter === "全部" ? "当前筛选结果" : userStatusFilter}`,
+        { excludeFrozen: userStatusFilter !== "冻结" }
+      );
+    }
+
+    function startDispatchFromData() {
+      const period = currentDataPeriod();
+      setDispatchList(users.map(user => user.id), `数据查看：${period.label}`, { excludeFrozen: true });
+    }
+
+    function statusBadge(status) {
+      const tone = status === "冻结" ? "red" : "ok";
+      return `<span class="badge ${tone}">${status}</span>`;
+    }
+
+    function planStatusBadge(plan) {
+      return `<span class="badge ${plan.enabled ? "ok" : "off"}">${plan.enabled ? "启用" : "停用"}</span>`;
+    }
+
+    function orderStatusBadge(status) {
+      const tone = status === "支付成功" ? "ok" : status === "待支付" ? "blue" : status === "已退款" ? "warn" : "red";
+      return `<span class="badge ${tone}">${status}</span>`;
+    }
+
+    function announcementStatusBadge(status) {
+      const tone = status === "已发布" ? "ok" : status === "草稿" ? "blue" : "off";
+      return `<span class="badge ${tone}">${status}</span>`;
+    }
+
+    function announcementTargetCount(audience) {
+      if (audience === "会员用户") return users.filter(user => user.member === "会员").length;
+      if (audience === "无会员用户") return users.filter(user => user.member === "无会员").length;
+      return users.length;
+    }
+
+    function nextAnnouncementId() {
+      const maxNumber = announcements.reduce((max, item) => {
+        const number = Number(String(item.id || "").replace(/\D/g, ""));
+        return Math.max(max, Number.isNaN(number) ? 0 : number);
+      }, 1000);
+      return `A${maxNumber + 1}`;
+    }
+
+    function planText(plan) {
+      return `${money(plan.price)} / ${plan.hours}小时转写 + ${plan.qa}次问答 / 月`;
+    }
+
+    function nowText() {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hour = String(date.getHours()).padStart(2, "0");
+      const minute = String(date.getMinutes()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hour}:${minute}`;
+    }
+
+    function addChangeRecord(user, type, before, after, note) {
+      changeRecords.unshift({
+        time: nowText(),
+        userId: user.id,
+        type,
+        before,
+        after,
+        note: note || "-"
+      });
+    }
+
+    function sortUsers(list) {
+      return [...list].sort((a, b) => {
+        if (userSort === "createdAsc") return compareDateText(a.createdAt, b.createdAt) || compareText(a.name, b.name);
+        if (userSort === "paidDesc") return compareNumber(a.paidAmount, b.paidAmount, true) || compareDateText(a.createdAt, b.createdAt, true);
+        if (userSort === "paidAsc") return compareNumber(a.paidAmount, b.paidAmount) || compareDateText(a.createdAt, b.createdAt, true);
+        if (userSort === "nameAsc") return compareText(a.name, b.name) || compareDateText(a.createdAt, b.createdAt, true);
+        return compareDateText(a.createdAt, b.createdAt, true) || compareText(a.name, b.name);
+      });
+    }
+
+    function sortDataRows(rows) {
+      return [...rows].sort((a, b) => {
+        if (dataSort === "paidDesc") return compareNumber(a.paid, b.paid, true) || compareText(a.user.name, b.user.name);
+        if (dataSort === "paidAsc") return compareNumber(a.paid, b.paid) || compareText(a.user.name, b.user.name);
+        if (dataSort === "nameAsc") return compareText(a.user.name, b.user.name) || compareNumber(a.paid, b.paid, true);
+        if (dataSort === "createdAsc") return compareDateText(a.user.createdAt, b.user.createdAt) || compareText(a.user.name, b.user.name);
+        return compareDateText(a.user.createdAt, b.user.createdAt, true) || compareText(a.user.name, b.user.name);
+      });
+    }
+
+    function sortOrderRecords(list) {
+      return [...list].sort((a, b) => {
+        if (orderSort === "paidAtAsc") return compareDateText(a.paidAt, b.paidAt) || compareText(a.id, b.id);
+        if (orderSort === "amountDesc") return compareNumber(a.amount, b.amount, true) || compareDateText(a.paidAt, b.paidAt, true);
+        if (orderSort === "amountAsc") return compareNumber(a.amount, b.amount) || compareDateText(a.paidAt, b.paidAt, true);
+        if (orderSort === "userAsc") return compareText(userName(a.userId), userName(b.userId)) || compareDateText(a.paidAt, b.paidAt, true);
+        return compareDateText(a.paidAt, b.paidAt, true) || compareText(a.id, b.id, true);
+      });
+    }
+
+    function sortAnnouncements(list) {
+      return [...list].sort((a, b) => {
+        if (announcementSort === "publishAsc") return compareDateText(a.publishAt, b.publishAt) || compareText(a.title, b.title);
+        if (announcementSort === "readDesc") return compareNumber(a.readCount, b.readCount, true) || compareDateText(a.publishAt, b.publishAt, true);
+        if (announcementSort === "readAsc") return compareNumber(a.readCount, b.readCount) || compareDateText(a.publishAt, b.publishAt, true);
+        if (announcementSort === "titleAsc") return compareText(a.title, b.title) || compareDateText(a.publishAt, b.publishAt, true);
+        return compareDateText(a.publishAt, b.publishAt, true) || compareText(a.title, b.title);
+      });
+    }
+
+    function dispatchSortDate(user) {
+      if (dispatchAudienceMode === "beforePurchase") return latestUserPlanPayment(user, "", dispatchFilterBeforeDate)?.date || user.createdAt;
+      if (dispatchAudienceMode === "periodPurchase") return latestUserPlanPayment(user, dispatchFilterStartDate, dispatchFilterEndDate)?.date || user.createdAt;
+      return latestUserPlanPayment(user)?.date || user.createdAt;
+    }
+
+    function sortDispatchRecipients(list) {
+      return [...list].sort((a, b) => {
+        if (dispatchSort === "purchaseAsc") return compareDateText(dispatchSortDate(a), dispatchSortDate(b)) || compareText(a.name, b.name);
+        if (dispatchSort === "createdDesc") return compareDateText(a.createdAt, b.createdAt, true) || compareText(a.name, b.name);
+        if (dispatchSort === "createdAsc") return compareDateText(a.createdAt, b.createdAt) || compareText(a.name, b.name);
+        if (dispatchSort === "nameAsc") return compareText(a.name, b.name) || compareDateText(dispatchSortDate(a), dispatchSortDate(b), true);
+        return compareDateText(dispatchSortDate(a), dispatchSortDate(b), true) || compareText(a.name, b.name);
+      });
+    }
+
+    function sortDispatchBatches(list) {
+      return [...list].sort((a, b) => {
+        if (dispatchRecordSort === "timeAsc") return compareDateText(a.time, b.time);
+        if (dispatchRecordSort === "countDesc") return compareNumber(a.count, b.count, true) || compareDateText(a.time, b.time, true);
+        if (dispatchRecordSort === "countAsc") return compareNumber(a.count, b.count) || compareDateText(a.time, b.time, true);
+        return compareDateText(a.time, b.time, true);
+      });
+    }
+
+    function sortChangeRecords(list) {
+      return [...list].sort((a, b) => {
+        if (changeSort === "timeAsc") return compareDateText(a.time, b.time);
+        if (changeSort === "userAsc") return compareText(a.userId, b.userId) || compareDateText(a.time, b.time, true);
+        if (changeSort === "userDesc") return compareText(a.userId, b.userId, true) || compareDateText(a.time, b.time, true);
+        return compareDateText(a.time, b.time, true);
+      });
+    }
+
+    function filteredUsers() {
+      return sortUsers(users.filter(user => {
+        const hitKeyword = userMatchesKeyword(user, userKeyword);
+        const hitStatus = userStatusFilter === "全部" || user.status === userStatusFilter;
+        const hitMember = userMemberFilter === "全部" || user.member === userMemberFilter;
+        const hitPlan = userPlanFilter === "全部" || user.monthPlanId === userPlanFilter;
+        const hitCreated = dateInRange(user.createdAt, userCreatedStart, userCreatedEnd);
+        return hitKeyword && hitStatus && hitMember && hitPlan && hitCreated;
+      }));
+    }
+
+    function panel(title, subtitle, content, actions = "") {
+      return `
+        <section class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><h2>${title}</h2><span>${subtitle}</span></div>
+            ${actions ? `<div class="panel-actions">${actions}</div>` : ""}
+          </div>
+          ${content}
+        </section>
+      `;
+    }
+
+    function summaryStrip(items) {
+      return `
+        <div class="summary-strip">
+          ${items.map(item => `<div class="summary-item"><span>${item.label}</span><strong>${item.value}</strong></div>`).join("")}
+        </div>
+      `;
+    }
+
+    function pageSizeFor(key) {
+      return tablePageSizes[key] || 5;
+    }
+
+    function totalPagesFor(total, pageSize) {
+      return Math.max(1, Math.ceil(total / pageSize));
+    }
+
+    function currentPageFor(key, total) {
+      const pageSize = pageSizeFor(key);
+      const totalPages = totalPagesFor(total, pageSize);
+      tablePages[key] = Math.min(Math.max(tablePages[key] || 1, 1), totalPages);
+      return tablePages[key];
+    }
+
+    function pagedItems(key, items) {
+      const pageSize = pageSizeFor(key);
+      const page = currentPageFor(key, items.length);
+      const start = (page - 1) * pageSize;
+      return items.slice(start, start + pageSize);
+    }
+
+    function setTablePage(key, page) {
+      tablePages[key] = page;
+      renderCurrentView();
+    }
+
+    function setTablePageSize(key, size) {
+      tablePageSizes[key] = Math.max(1, Number(size) || pageSizeFor(key));
+      tablePages[key] = 1;
+      renderCurrentView();
+    }
+
+    function jumpTablePage(key, page) {
+      tablePages[key] = Math.max(1, Number(page) || 1);
+      renderCurrentView();
+    }
+
+    function pageSizeOptionsFor(key) {
+      const base = [5, 10, 20, 50];
+      const current = pageSizeFor(key);
+      return base.includes(current) ? base : [...base, current].sort((a, b) => a - b);
+    }
+
+    function pagerRange(page, totalPages) {
+      if (totalPages <= 5) {
+        return Array.from({ length: totalPages }, (_, index) => index + 1);
+      }
+      const pages = [1];
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+      if (start > 2) pages.push("left-gap");
+      for (let item = start; item <= end; item += 1) pages.push(item);
+      if (end < totalPages - 1) pages.push("right-gap");
+      pages.push(totalPages);
+      return pages;
+    }
+
+    function renderPager(key, total) {
+      const pageSize = pageSizeFor(key);
+      const page = currentPageFor(key, total);
+      const totalPages = totalPagesFor(total, pageSize);
+      const start = total ? (page - 1) * pageSize + 1 : 0;
+      const end = total ? Math.min(total, page * pageSize) : 0;
+      const pageSizeOptions = pageSizeOptionsFor(key).map(size => `<option value="${size}" ${size === pageSize ? "selected" : ""}>${size}条/页</option>`).join("");
+      const pageItems = pagerRange(page, totalPages).map(item => {
+        if (typeof item === "string") return `<span class="pager-ellipsis">...</span>`;
+        return `<button class="pager-page ${item === page ? "active" : ""}" onclick="setTablePage('${key}', ${item})" ${item === page ? `aria-current="page"` : ""}>${item}</button>`;
+      }).join("");
+      return `
+        <div class="table-footer">
+          <div class="pager-bar">
+            <span class="pager-total">共 ${total} 条</span>
+            <select class="pager-size" onchange="setTablePageSize('${key}', this.value)">${pageSizeOptions}</select>
+            <nav class="pager-actions" aria-label="分页">
+              <button class="pager-prev" onclick="setTablePage('${key}', ${page - 1})" ${page <= 1 ? "disabled" : ""}>上一页</button>
+              ${pageItems}
+              <button class="pager-next" onclick="setTablePage('${key}', ${page + 1})" ${page >= totalPages ? "disabled" : ""}>下一页</button>
+            </nav>
+            <label class="pager-jumper">前往 <input class="pager-jump-input" type="number" min="1" max="${totalPages}" value="${page}" onchange="jumpTablePage('${key}', this.value)" onkeydown="if(event.key === 'Enter') jumpTablePage('${key}', this.value)" /> 页</label>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNav() {
+      const nav = document.getElementById("nav");
+      const activeView = currentView === "detail" ? "users" : currentView;
+      nav.innerHTML = navItems.map(item => `
+        <button class="${item.id === activeView ? "active" : ""}" data-view="${item.id}">
+          ${svg(item.icon)}
+          <span>${item.name}</span>
+        </button>
+      `).join("");
+      nav.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          activeDatePickerKey = "";
+          currentView = button.dataset.view;
+          renderApp();
+        });
+      });
+    }
+
+    function setPageMeta() {
+      if (currentView === "detail") {
+        const user = selectedUser();
+        pageTitle.textContent = "用户详情";
+        pageDesc.textContent = `${user.name} · 资料、权益、付费金额和记录`;
+        return;
+      }
+      const item = navItems.find(nav => nav.id === currentView);
+      pageTitle.textContent = item.name;
+      pageDesc.textContent = item.desc;
+    }
+
+    function openUserDetail(userId) {
+      selectedUserId = userId;
+      currentView = "detail";
+      renderApp();
+    }
+
+    function renderUsers() {
+      const list = filteredUsers();
+      if (list.length && !list.some(user => user.id === selectedUserId)) {
+        selectedUserId = list[0].id;
+      }
+      const visibleUsers = pagedItems("users", list);
+      root.innerHTML = `
+        <div class="view-grid">
+          ${panel("用户列表", "基础信息、会员、本月套餐和状态", `
+            <div class="filter-bar">
+              <label class="filter-item">
+                <span>关键字</span>
+                <input class="filter-date search-input" id="userKeyword" value="${userKeyword}" placeholder="手机号 / 用户ID / 名称" />
+              </label>
+              <label class="filter-item">
+                <span>状态</span>
+                <select class="filter-select" id="statusFilter"><option ${userStatusFilter === "全部" ? "selected" : ""}>全部</option><option ${userStatusFilter === "正常" ? "selected" : ""}>正常</option><option ${userStatusFilter === "冻结" ? "selected" : ""}>冻结</option></select>
+              </label>
+              <label class="filter-item">
+                <span>会员</span>
+                <select class="filter-select" id="memberFilter"><option ${userMemberFilter === "全部" ? "selected" : ""}>全部</option><option ${userMemberFilter === "会员" ? "selected" : ""}>会员</option><option ${userMemberFilter === "无会员" ? "selected" : ""}>无会员</option></select>
+              </label>
+              <label class="filter-item">
+                <span>套餐</span>
+                <select class="filter-select" id="userPlanFilter">${allPlanSelectOptions(userPlanFilter)}</select>
+              </label>
+              ${dateRangeControl("userCreated", "注册时间", userCreatedStart, userCreatedEnd)}
+              ${sortControl("userSort", userSort, [
+                { value: "createdDesc", label: "注册时间倒序" },
+                { value: "createdAsc", label: "注册时间正序" },
+                { value: "paidDesc", label: "付费金额高到低" },
+                { value: "paidAsc", label: "付费金额低到高" },
+                { value: "nameAsc", label: "名称升序" }
+              ])}
+              <div class="filter-actions">
+                <button class="primary-btn filter-btn" onclick="applyUserFilters()">查询</button>
+                <button class="text-btn filter-btn" onclick="resetUserFilters()">重置</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table users-table">
+                <colgroup>
+                  <col class="col-user" />
+                  <col class="col-phone" />
+                  <col class="col-member" />
+                  <col class="col-plan" />
+                  <col class="col-status" />
+                  <col class="col-action" />
+                </colgroup>
+                <thead><tr><th>用户</th><th>手机号</th><th>会员</th><th>本月套餐</th><th>状态</th><th class="action">操作</th></tr></thead>
+                <tbody>
+                  ${list.length ? visibleUsers.map(user => {
+                    const plan = planById(user.monthPlanId);
+                    return `
+                      <tr data-id="${user.id}" class="${user.id === selectedUserId ? "selected" : ""}">
+                        <td><strong>${user.name}</strong><span class="sub-text">${user.id}</span></td>
+                        <td>${user.phone}</td>
+                        <td>${user.member}</td>
+                        <td><span class="badge blue">${plan.name}</span></td>
+                        <td>${statusBadge(user.status)}</td>
+                        <td class="action"><button class="text-btn" onclick="event.stopPropagation(); openUserDetail('${user.id}')">${svg("i-detail")}详情</button></td>
+                      </tr>
+                    `;
+                  }).join("") : `<tr><td colspan="6" class="muted">没有匹配的用户</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+            ${renderPager("users", list.length)}
+          `, `<button class="text-btn" onclick="startDispatchFromUsers()">${svg("i-send")}加入发放名单</button>`)}
+          <aside class="detail-rail" id="userDetail"></aside>
+        </div>
+      `;
+      document.getElementById("userKeyword").addEventListener("keydown", event => {
+        if (event.key === "Enter") applyUserFilters();
+      });
+      document.querySelectorAll("tr[data-id]").forEach(row => {
+        row.addEventListener("click", () => {
+          selectedUserId = row.dataset.id;
+          renderUsers();
+        });
+      });
+      renderUserDetail();
+    }
+
+    function applyUserFilters() {
+      userKeyword = document.getElementById("userKeyword")?.value.trim() || "";
+      userStatusFilter = document.getElementById("statusFilter")?.value || "全部";
+      userMemberFilter = document.getElementById("memberFilter")?.value || "全部";
+      userPlanFilter = document.getElementById("userPlanFilter")?.value || "全部";
+      userSort = document.getElementById("userSort")?.value || userSort;
+      if (userCreatedStart && userCreatedEnd && userCreatedStart > userCreatedEnd) {
+        showToast("注册时间范围无效");
+        return;
+      }
+      tablePages.users = 1;
+      renderUsers();
+    }
+
+    function resetUserFilters() {
+      userKeyword = "";
+      userStatusFilter = "全部";
+      userMemberFilter = "全部";
+      userPlanFilter = "全部";
+      userCreatedStart = "";
+      userCreatedEnd = "";
+      userSort = "createdDesc";
+      tablePages.users = 1;
+      renderUsers();
+    }
+
+    function renderUserDetail() {
+      const detail = document.getElementById("userDetail");
+      const user = selectedUser();
+      const plan = planById(user.monthPlanId);
+      detail.innerHTML = `
+        <div class="rail-head">
+          <div><h3>${user.name}</h3><p>${user.id} · ${user.phone}</p></div>
+          ${statusBadge(user.status)}
+        </div>
+        <div class="rail-section">
+          <h4>基本信息</h4>
+          <dl class="kv">
+            <dt>注册时间</dt><dd>${user.createdAt}</dd>
+            <dt>会员</dt><dd>${user.member}</dd>
+            <dt>会员到期</dt><dd>${user.memberExpire}</dd>
+            <dt>本月套餐</dt><dd>${plan.name}</dd>
+            <dt>套餐配额</dt><dd>${plan.hours}小时转写，${plan.qa}次知识库问答</dd>
+            <dt>冻结原因</dt><dd>${user.freezeReason || "-"}</dd>
+          </dl>
+          <div class="inline-actions">
+            <button class="danger-btn" onclick="openFreezeModal(selectedUser())">${svg("i-shield")}${user.status === "冻结" ? "解除冻结" : "冻结用户"}</button>
+            <button class="primary-btn" onclick="openGiftMemberModal(selectedUser())">${svg("i-plus")}赠送权益</button>
+            <button class="text-btn" onclick="openEditMemberModal(selectedUser())">${svg("i-edit")}修改会员</button>
+            <button class="text-btn" onclick="openChangePlanModal(selectedUser())">${svg("i-package")}更改此人此月套餐</button>
+            <button class="text-btn" onclick="openUserDetail(selectedUserId)">${svg("i-detail")}查看完整详情</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDetail() {
+      const user = selectedUser();
+      const plan = planById(user.monthPlanId);
+      const userChanges = changeRecords.filter(record => record.userId === user.id);
+      const period = currentDataPeriod();
+      const paidAmount = userPeriodPaidAmount(user.id, period);
+      root.innerHTML = `
+        <div class="detail-layout">
+          ${panel("用户资料", "所选用户的基础信息和当前权益", `
+            <div class="detail-hero">
+              <h2>${user.name}</h2>
+              <p>${user.id} · ${user.phone}</p>
+            </div>
+            <div class="rail-section">
+              <dl class="kv">
+                <dt>状态</dt><dd>${statusBadge(user.status)}</dd>
+                <dt>注册时间</dt><dd>${user.createdAt}</dd>
+                <dt>会员</dt><dd>${user.member}</dd>
+                <dt>会员到期</dt><dd>${user.memberExpire}</dd>
+                <dt>本月套餐</dt><dd>${plan.name}</dd>
+                <dt>套餐配额</dt><dd>${plan.hours}小时转写，${plan.qa}次知识库问答</dd>
+                <dt>账期付费</dt><dd class="money">${money(paidAmount)}</dd>
+                <dt>冻结原因</dt><dd>${user.freezeReason || "-"}</dd>
+              </dl>
+            </div>
+            <div class="detail-actions">
+              <button class="danger-btn" onclick="openFreezeModal(selectedUser())">${svg("i-shield")}${user.status === "冻结" ? "解除冻结" : "冻结用户"}</button>
+              <button class="primary-btn" onclick="openGiftMemberModal(selectedUser())">${svg("i-plus")}赠送权益</button>
+              <button class="text-btn" onclick="openEditMemberModal(selectedUser())">${svg("i-edit")}修改会员</button>
+              <button class="text-btn" onclick="openChangePlanModal(selectedUser())">${svg("i-package")}更改此人此月套餐</button>
+            </div>
+          `, `<button class="text-btn" onclick="currentView='users'; renderApp();">${svg("i-users")}返回用户管理</button>`)}
+          <div style="display:grid;gap:18px;min-width:0">
+            ${summaryStrip([
+              { label: "账期付费", value: money(paidAmount) },
+              { label: "当前套餐", value: plan.name },
+              { label: "账期", value: period.label }
+            ])}
+            ${panel("套餐变更记录", "该用户的会员、冻结和当月套餐调整", `
+              <div class="record-list scroll-area">
+                ${userChanges.length ? userChanges.map(record => `
+                  <div class="record-row">
+                    <div><strong>${record.type}</strong><span class="sub-text">${record.time}</span></div>
+                    <div>${record.before} → ${record.after}<span class="sub-text">${record.note}</span></div>
+                    <span class="badge teal">已记录</span>
+                  </div>
+                `).join("") : `<div class="rail-section muted">暂无记录</div>`}
+              </div>
+            `)}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderData() {
+      const period = currentDataPeriod();
+      const rows = sortDataRows(users.map(user => {
+        const paid = userPeriodPaidAmount(user.id, period);
+        return { user, paid };
+      }).filter(row => {
+        const hitKeyword = userMatchesKeyword(row.user, dataKeyword);
+        const hitPlan = dataPlanFilter === "全部" || row.user.monthPlanId === dataPlanFilter;
+        const hitStatus = dataStatusFilter === "全部" || row.user.status === dataStatusFilter;
+        return hitKeyword && hitPlan && hitStatus;
+      }));
+      const visibleRows = pagedItems("data", rows);
+      const paidTotal = rows.reduce((sum, row) => sum + row.paid, 0);
+      root.innerHTML = `
+        <div class="view-stack view-compact">
+          ${summaryStrip([
+              { label: "筛选用户数", value: `${rows.length}人` },
+              { label: "筛选付费金额", value: money(paidTotal) },
+              { label: "账期", value: period.label }
+            ])}
+          ${panel("账期数据", period.label, `
+            <div class="filter-bar">
+              <label class="filter-item">
+                <span>账期</span>
+                <select class="filter-select" id="dataPeriodMode">
+                  <option value="all" ${dataPeriodMode === "all" ? "selected" : ""}>全部账期</option>
+                  ${dataStages.map(item => `<option value="stage:${item.id}" ${(dataPeriodMode === "stage" && selectedDataStageId === item.id) ? "selected" : ""}>${item.name}</option>`).join("")}
+                  <option value="custom" ${dataPeriodMode === "custom" ? "selected" : ""}>自定义日期</option>
+                </select>
+              </label>
+              ${dataPeriodMode === "custom" ? dateRangeControl("dataPeriod", "自定义日期", customStartDate, customEndDate) : ""}
+              <label class="filter-item">
+                <span>关键字</span>
+                <input class="filter-date search-input" id="dataKeyword" value="${dataKeyword}" placeholder="用户ID / 名称 / 手机号" />
+              </label>
+              <label class="filter-item">
+                <span>套餐</span>
+                <select class="filter-select" id="dataPlanFilter">${allPlanSelectOptions(dataPlanFilter)}</select>
+              </label>
+              <label class="filter-item">
+                <span>状态</span>
+                <select class="filter-select" id="dataStatusFilter"><option ${dataStatusFilter === "全部" ? "selected" : ""}>全部</option><option ${dataStatusFilter === "正常" ? "selected" : ""}>正常</option><option ${dataStatusFilter === "冻结" ? "selected" : ""}>冻结</option></select>
+              </label>
+              ${sortControl("dataSort", dataSort, [
+                { value: "paidDesc", label: "付费金额高到低" },
+                { value: "paidAsc", label: "付费金额低到高" },
+                { value: "createdDesc", label: "注册时间倒序" },
+                { value: "createdAsc", label: "注册时间正序" },
+                { value: "nameAsc", label: "名称升序" }
+              ])}
+              <div class="filter-actions">
+                <button class="primary-btn filter-btn" onclick="applyDataPeriodFilter()">查询</button>
+                <button class="text-btn filter-btn" onclick="resetDataPeriodFilter()">重置</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table finance-table">
+                <colgroup>
+                  <col class="col-user" />
+                  <col class="col-money" />
+                  <col class="col-plan" />
+                  <col class="col-status" />
+                </colgroup>
+                <thead><tr><th>用户</th><th class="money">总付费金额</th><th>当前套餐</th><th>状态</th></tr></thead>
+                <tbody>
+                  ${visibleRows.length ? visibleRows.map(row => `
+                    <tr>
+                      <td><strong>${row.user.name}</strong><span class="sub-text">${row.user.id}</span></td>
+                      <td class="money">${money(row.paid)}</td>
+                      <td><span class="badge blue">${planById(row.user.monthPlanId).name}</span></td>
+                      <td>${statusBadge(row.user.status)}</td>
+                    </tr>
+                  `).join("") : `<tr><td colspan="4" class="muted">暂无符合条件的数据</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+            ${renderPager("data", rows.length)}
+          `, `<button class="text-btn" onclick="startDispatchFromData()">${svg("i-send")}加入发放名单</button>`)}
+        </div>
+      `;
+      document.getElementById("dataPeriodMode").addEventListener("change", event => {
+        const value = event.target.value;
+        if (value === "all") {
+          dataPeriodMode = "all";
+        } else if (value === "custom") {
+          dataPeriodMode = "custom";
+        } else if (value.startsWith("stage:")) {
+          dataPeriodMode = "stage";
+          selectedDataStageId = value.replace("stage:", "");
+        }
+        tablePages.data = 1;
+        renderData();
+      });
+      document.getElementById("dataKeyword").addEventListener("keydown", event => {
+        if (event.key === "Enter") applyDataPeriodFilter();
+      });
+    }
+
+    function applyDataPeriodFilter() {
+      if (dataPeriodMode === "custom") {
+        if (customStartDate && customEndDate && customStartDate > customEndDate) {
+          showToast("自定义日期范围无效");
+          return;
+        }
+      }
+      dataKeyword = document.getElementById("dataKeyword")?.value.trim() || "";
+      dataPlanFilter = document.getElementById("dataPlanFilter")?.value || "全部";
+      dataStatusFilter = document.getElementById("dataStatusFilter")?.value || "全部";
+      dataSort = document.getElementById("dataSort")?.value || dataSort;
+      tablePages.data = 1;
+      renderData();
+    }
+
+    function resetDataPeriodFilter() {
+      dataPeriodMode = "all";
+      customStartDate = "";
+      customEndDate = "";
+      dataKeyword = "";
+      dataPlanFilter = "全部";
+      dataStatusFilter = "全部";
+      dataSort = "paidDesc";
+      tablePages.data = 1;
+      renderData();
+    }
+
+    function renderOrders() {
+      const filtered = sortOrderRecords(orderRecords.filter(order => {
+        const user = userById(order.userId);
+        const plan = planById(order.planId);
+        const keyword = orderKeyword.trim().toLowerCase();
+        const hitKeyword = !keyword || [order.id, order.channelNo, order.channel, order.status, user?.id, user?.name, user?.phone, plan.name].some(value => String(value || "").toLowerCase().includes(keyword));
+        const hitPlan = orderPlanFilter === "全部" || order.planId === orderPlanFilter;
+        const hitStatus = orderStatusFilter === "全部" || order.status === orderStatusFilter;
+        const hitDate = dateInRange(order.date, orderStartDate, orderEndDate);
+        return hitKeyword && hitPlan && hitStatus && hitDate;
+      }));
+      const visibleOrders = pagedItems("orders", filtered);
+      const successOrders = filtered.filter(order => order.status === "支付成功");
+      const pendingOrders = filtered.filter(order => ["待支付", "支付失败"].includes(order.status));
+      const refundOrders = filtered.filter(order => order.status === "已退款");
+      const successAmount = successOrders.reduce((sum, order) => sum + Number(order.amount), 0);
+      root.innerHTML = `
+        <div class="view-stack view-compact">
+          ${summaryStrip([
+            { label: "成功金额", value: money(successAmount) },
+            { label: "成功订单", value: `${successOrders.length}笔` },
+            { label: "待处理", value: `${pendingOrders.length}笔` },
+            { label: "退款", value: `${refundOrders.length}笔` }
+          ])}
+          ${panel("订单查询", "按订单号、用户、套餐和状态查询充值记录", `
+            <div class="filter-bar">
+              <label class="filter-item">
+                <span>关键字</span>
+                <input class="filter-date search-input" id="orderKeyword" value="${escapeHtml(orderKeyword)}" placeholder="订单号 / 渠道单号 / 用户 / 手机号" onkeydown="if(event.key==='Enter') applyOrderFilters()" />
+              </label>
+              <label class="filter-item">
+                <span>套餐</span>
+                <select class="filter-select" id="orderPlanFilter">${allPlanSelectOptions(orderPlanFilter)}</select>
+              </label>
+              <label class="filter-item">
+                <span>状态</span>
+                <select class="filter-select" id="orderStatusFilter">
+                  <option ${orderStatusFilter === "全部" ? "selected" : ""}>全部</option>
+                  <option ${orderStatusFilter === "支付成功" ? "selected" : ""}>支付成功</option>
+                  <option ${orderStatusFilter === "待支付" ? "selected" : ""}>待支付</option>
+                  <option ${orderStatusFilter === "支付失败" ? "selected" : ""}>支付失败</option>
+                  <option ${orderStatusFilter === "已退款" ? "selected" : ""}>已退款</option>
+                </select>
+              </label>
+              ${dateRangeControl("orders", "订单时间", orderStartDate, orderEndDate)}
+              ${sortControl("orderSort", orderSort, [
+                { value: "paidAtDesc", label: "订单时间倒序" },
+                { value: "paidAtAsc", label: "订单时间正序" },
+                { value: "amountDesc", label: "金额高到低" },
+                { value: "amountAsc", label: "金额低到高" },
+                { value: "userAsc", label: "用户名称升序" }
+              ])}
+              <div class="filter-actions">
+                <button class="primary-btn filter-btn" onclick="applyOrderFilters()">查询</button>
+                <button class="text-btn filter-btn" onclick="resetOrderFilters()">重置</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table orders-table">
+                <colgroup>
+                  <col class="col-order" />
+                  <col class="col-user" />
+                  <col class="col-plan" />
+                  <col class="col-money" />
+                  <col class="col-status" />
+                  <col class="col-time" />
+                  <col class="col-action" />
+                </colgroup>
+                <thead><tr><th>订单</th><th>用户</th><th>套餐</th><th class="money">金额</th><th>状态</th><th>时间</th><th class="action">操作</th></tr></thead>
+                <tbody>
+                  ${visibleOrders.length ? visibleOrders.map(order => {
+                    const user = userById(order.userId);
+                    const plan = planById(order.planId);
+                    return `
+                      <tr>
+                        <td><strong>${order.id}</strong><span class="sub-text">${order.channel} · ${order.channelNo}</span></td>
+                        <td><strong>${user?.name || order.userId}</strong><span class="sub-text">${order.userId} · ${user?.phone || "-"}</span></td>
+                        <td><span class="badge blue">${plan.name}</span></td>
+                        <td class="money">${money(order.amount)}</td>
+                        <td>${orderStatusBadge(order.status)}</td>
+                        <td>${order.paidAt === "-" ? order.date : order.paidAt}</td>
+                        <td class="action"><button class="text-btn" onclick="openUserDetail('${order.userId}')">查看用户</button></td>
+                      </tr>
+                    `;
+                  }).join("") : `<tr><td colspan="7" class="muted">暂无符合条件的订单</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+            ${renderPager("orders", filtered.length)}
+          `)}
+        </div>
+      `;
+    }
+
+    function applyOrderFilters() {
+      orderKeyword = document.getElementById("orderKeyword")?.value.trim() || "";
+      orderPlanFilter = document.getElementById("orderPlanFilter")?.value || "全部";
+      orderStatusFilter = document.getElementById("orderStatusFilter")?.value || "全部";
+      orderSort = document.getElementById("orderSort")?.value || orderSort;
+      if (orderStartDate && orderEndDate && orderStartDate > orderEndDate) {
+        showToast("订单时间范围无效");
+        return;
+      }
+      tablePages.orders = 1;
+      renderOrders();
+    }
+
+    function resetOrderFilters() {
+      orderKeyword = "";
+      orderPlanFilter = "全部";
+      orderStatusFilter = "全部";
+      orderStartDate = "";
+      orderEndDate = "";
+      orderSort = "paidAtDesc";
+      tablePages.orders = 1;
+      renderOrders();
+    }
+
+    function announcementReadText(item) {
+      if (!item.targetCount) return "-";
+      const percent = Math.round((Number(item.readCount) || 0) / item.targetCount * 100);
+      return `${item.readCount}/${item.targetCount}（${percent}%）`;
+    }
+
+    function renderAnnouncements() {
+      const filtered = sortAnnouncements(announcements.filter(item => {
+        const keyword = announcementKeyword.trim().toLowerCase();
+        const hitKeyword = !keyword || [item.id, item.title, item.audience, item.status, item.content].some(value => String(value || "").toLowerCase().includes(keyword));
+        const hitStatus = announcementStatusFilter === "全部" || item.status === announcementStatusFilter;
+        const hitAudience = announcementAudienceFilter === "全部" || item.audience === announcementAudienceFilter;
+        return hitKeyword && hitStatus && hitAudience;
+      }));
+      const visibleItems = pagedItems("announcements", filtered);
+      const publishedCount = announcements.filter(item => item.status === "已发布").length;
+      const draftCount = announcements.filter(item => item.status === "草稿").length;
+      root.innerHTML = `
+        <div class="view-stack view-compact">
+          ${summaryStrip([
+            { label: "已发布", value: `${publishedCount}条` },
+            { label: "草稿", value: `${draftCount}条` },
+            { label: "全部公告", value: `${announcements.length}条` }
+          ])}
+          ${panel("公告列表", "管理 App 内展示的站内公告", `
+            <div class="filter-bar">
+              <label class="filter-item">
+                <span>关键字</span>
+                <input class="filter-date search-input" id="announcementKeyword" value="${escapeHtml(announcementKeyword)}" placeholder="标题 / 内容 / 公告ID" onkeydown="if(event.key==='Enter') applyAnnouncementFilters()" />
+              </label>
+              <label class="filter-item">
+                <span>状态</span>
+                <select class="filter-select" id="announcementStatusFilter">
+                  <option ${announcementStatusFilter === "全部" ? "selected" : ""}>全部</option>
+                  <option ${announcementStatusFilter === "已发布" ? "selected" : ""}>已发布</option>
+                  <option ${announcementStatusFilter === "草稿" ? "selected" : ""}>草稿</option>
+                  <option ${announcementStatusFilter === "已下线" ? "selected" : ""}>已下线</option>
+                </select>
+              </label>
+              <label class="filter-item">
+                <span>接收范围</span>
+                <select class="filter-select" id="announcementAudienceFilter">
+                  <option ${announcementAudienceFilter === "全部" ? "selected" : ""}>全部</option>
+                  ${announcementAudiences.map(value => `<option ${announcementAudienceFilter === value ? "selected" : ""}>${value}</option>`).join("")}
+                </select>
+              </label>
+              ${sortControl("announcementSort", announcementSort, [
+                { value: "publishDesc", label: "发布时间倒序" },
+                { value: "publishAsc", label: "发布时间正序" },
+                { value: "readDesc", label: "已读人数多到少" },
+                { value: "readAsc", label: "已读人数少到多" },
+                { value: "titleAsc", label: "标题升序" }
+              ])}
+              <div class="filter-actions">
+                <button class="primary-btn filter-btn" onclick="applyAnnouncementFilters()">查询</button>
+                <button class="text-btn filter-btn" onclick="resetAnnouncementFilters()">重置</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table announcement-table">
+                <colgroup>
+                  <col class="col-title" />
+                  <col class="col-audience" />
+                  <col class="col-status" />
+                  <col class="col-date" />
+                  <col class="col-read" />
+                  <col class="col-action" />
+                </colgroup>
+                <thead><tr><th>公告</th><th>接收范围</th><th>状态</th><th>发布时间</th><th>已读</th><th class="action">操作</th></tr></thead>
+                <tbody>
+                  ${visibleItems.length ? visibleItems.map(item => `
+                    <tr>
+                      <td><strong>${escapeHtml(item.title)}</strong><span class="sub-text">${item.id}${item.pinned ? " · 置顶" : ""} · ${escapeHtml(item.content)}</span></td>
+                      <td>${item.audience}</td>
+                      <td>${announcementStatusBadge(item.status)}</td>
+                      <td>${item.publishAt}<span class="sub-text">有效至 ${item.expireAt || "-"}</span></td>
+                      <td>${announcementReadText(item)}</td>
+                      <td class="action">
+                        <div class="row-actions">
+                          <button class="text-btn" onclick="openAnnouncementModal(announcements.find(item => item.id === '${item.id}'))">${svg("i-edit")}编辑</button>
+                          <button class="text-btn" onclick="toggleAnnouncementStatus(announcements.find(item => item.id === '${item.id}'))">${item.status === "已发布" ? "下线" : "发布"}</button>
+                        </div>
+                      </td>
+                    </tr>
+                  `).join("") : `<tr><td colspan="6" class="muted">暂无符合条件的公告</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+            ${renderPager("announcements", filtered.length)}
+          `, `<button class="primary-btn" onclick="openAnnouncementModal()">${svg("i-plus")}新建公告</button>`)}
+        </div>
+      `;
+    }
+
+    function applyAnnouncementFilters() {
+      announcementKeyword = document.getElementById("announcementKeyword")?.value.trim() || "";
+      announcementStatusFilter = document.getElementById("announcementStatusFilter")?.value || "全部";
+      announcementAudienceFilter = document.getElementById("announcementAudienceFilter")?.value || "全部";
+      announcementSort = document.getElementById("announcementSort")?.value || announcementSort;
+      tablePages.announcements = 1;
+      renderAnnouncements();
+    }
+
+    function resetAnnouncementFilters() {
+      announcementKeyword = "";
+      announcementStatusFilter = "全部";
+      announcementAudienceFilter = "全部";
+      announcementSort = "publishDesc";
+      tablePages.announcements = 1;
+      renderAnnouncements();
+    }
+
+    function toggleAnnouncementStatus(item) {
+      if (!item) return;
+      if (item.status === "已发布") {
+        item.status = "已下线";
+        showToast(`${item.title} 已下线`);
+      } else {
+        item.status = "已发布";
+        if (!item.publishAt || item.publishAt === "-") item.publishAt = nowText();
+        if (!item.targetCount) item.targetCount = announcementTargetCount(item.audience);
+        item.readCount = Math.min(Number(item.readCount) || 0, item.targetCount);
+        showToast(`${item.title} 已发布`);
+      }
+      renderApp();
+    }
+
+    function renderPricing() {
+      root.innerHTML = panel("套餐定价", "套餐配额只包含转写时长和知识库问答次数", `
+        <div class="table-scroll">
+          <table class="data-table pricing-table">
+            <colgroup>
+              <col class="col-plan" />
+              <col class="col-price" />
+              <col class="col-hours" />
+              <col class="col-qa" />
+              <col class="col-status" />
+              <col class="col-action" />
+            </colgroup>
+            <thead><tr><th>套餐</th><th class="money">价格</th><th>转写时长/月</th><th>知识库问答/月</th><th>状态</th><th class="action">操作</th></tr></thead>
+            <tbody>
+              ${plans.map(plan => `
+                <tr>
+                  <td><strong>${plan.name}</strong></td>
+                  <td class="money">${money(plan.price)}</td>
+                  <td>${plan.hours} 小时</td>
+                  <td>${plan.qa} 次</td>
+                  <td>${planStatusBadge(plan)}</td>
+                  <td class="action">
+                    <div class="row-actions">
+                      <button class="text-btn" onclick="openEditPlanModal(plans.find(item => item.id === '${plan.id}'))">${svg("i-edit")}修改</button>
+                      <button class="text-btn" onclick="togglePlanEnabled(plans.find(item => item.id === '${plan.id}'))">${plan.enabled ? "停用" : "启用"}</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `);
+    }
+
+    function dispatchTypeLabel() {
+      if (dispatchType === "member") return "会员发放";
+      if (dispatchType === "quota") return "配额发放";
+      return "组合补偿";
+    }
+
+    function renderDispatchTabs() {
+      return `
+        <div class="dispatch-tabs" role="tablist">
+          <button class="dispatch-tab ${dispatchTab === "create" ? "active" : ""}" onclick="activeDatePickerKey=''; dispatchTab='create'; renderDispatch();">新建发放</button>
+          <button class="dispatch-tab ${dispatchTab === "records" ? "active" : ""}" onclick="activeDatePickerKey=''; dispatchTab='records'; renderDispatch();">发放记录</button>
+        </div>
+      `;
+    }
+
+    function renderDispatchContentFields() {
+      const typeSelect = `
+        <div class="form-item">
+          <label>发放类型</label>
+          <select id="dispatchType" onchange="dispatchType=this.value; renderDispatch();">
+            <option value="benefit" ${dispatchType === "benefit" ? "selected" : ""}>组合补偿</option>
+            <option value="member" ${dispatchType === "member" ? "selected" : ""}>会员天数</option>
+            <option value="quota" ${dispatchType === "quota" ? "selected" : ""}>套餐配额</option>
+          </select>
+        </div>
+      `;
+      const reason = `
+        <div class="form-item full">
+          <label>发放原因</label>
+          <input id="dispatchReason" value="${dispatchReason}" onchange="dispatchReason=this.value.trim()" placeholder="例如：套餐调整补偿" />
+        </div>
+      `;
+      if (dispatchType === "member") {
+        return `
+          ${typeSelect}
+          <div class="form-item">
+            <label>会员天数</label>
+            <input id="dispatchMemberDays" type="number" min="1" value="${dispatchMemberDays}" onchange="dispatchMemberDays=this.value" />
+          </div>
+          ${reason}
+        `;
+      }
+      if (dispatchType === "quota") {
+        return `
+          ${typeSelect}
+          <div class="form-item">
+            <label>转写时长/小时</label>
+            <input id="dispatchHours" type="number" min="0" value="${dispatchHours}" onchange="dispatchHours=this.value" />
+          </div>
+          <div class="form-item">
+            <label>问答次数</label>
+            <input id="dispatchQa" type="number" min="0" value="${dispatchQa}" onchange="dispatchQa=this.value" />
+          </div>
+          ${reason}
+        `;
+      }
+      return `
+        ${typeSelect}
+        <div class="form-item">
+          <label>会员天数</label>
+          <input id="dispatchMemberDays" type="number" min="1" value="${dispatchMemberDays}" onchange="dispatchMemberDays=this.value" />
+        </div>
+        <div class="form-item">
+          <label>转写时长/小时</label>
+          <input id="dispatchHours" type="number" min="0" value="${dispatchHours}" onchange="dispatchHours=this.value" />
+        </div>
+        <div class="form-item">
+          <label>问答次数</label>
+          <input id="dispatchQa" type="number" min="0" value="${dispatchQa}" onchange="dispatchQa=this.value" />
+        </div>
+        ${reason}
+      `;
+    }
+
+    function renderDispatchStepBar() {
+      const steps = [
+        { id: "audience", index: "1", title: "选择对象", desc: "按套餐和时间筛选账号" },
+        { id: "content", index: "2", title: "设置内容", desc: "配置会员和配额" },
+        { id: "confirm", index: "3", title: "确认发放", desc: "复核后一次性发出" }
+      ];
+      return `
+        <div class="dispatch-stepbar">
+          ${steps.map(step => `
+            <button class="dispatch-step ${dispatchStep === step.id ? "active" : ""}" onclick="dispatchStep='${step.id}'; renderDispatch();">
+              <span class="dispatch-step-index">${step.index}</span>
+              <span class="dispatch-step-text">
+                <strong>${step.title}</strong>
+                <span>${step.desc}</span>
+              </span>
+            </button>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderDispatchAudience() {
+      const recipients = dispatchRecipients();
+      const visibleRecipients = pagedItems("dispatchUsers", recipients);
+      return panel("选择发放对象", "按套餐和购买时间筛选账号", `
+        <div class="dispatch-screen">
+          <div class="dispatch-screen-head">
+            <div class="dispatch-screen-copy">
+              <h3>对象筛选</h3>
+              <span class="sub-text">先把要发的人筛出来，再进入下一步配置发放内容。</span>
+            </div>
+            <div class="dispatch-screen-actions">
+              ${dispatchAudienceMode === "currentList" ? `<button class="text-btn" onclick="dispatchUserIds=[]; dispatchSourceLabel='当前名单'; tablePages.dispatchUsers=1; renderDispatch();">清空名单</button>` : ""}
+              <button class="primary-btn" onclick="applyDispatchAudienceFilter(); dispatchStep='content'; renderDispatch();" ${recipients.length ? "" : "disabled"}>${svg("i-chevron-right")}下一步</button>
+            </div>
+          </div>
+          <div class="dispatch-filter-grid">
+            <label class="filter-item">
+              <span>筛选方式</span>
+              <select class="filter-select" id="dispatchAudienceMode" onchange="dispatchAudienceMode=this.value; renderDispatch();">
+                <option value="currentPlan" ${dispatchAudienceMode === "currentPlan" ? "selected" : ""}>当前套餐</option>
+                <option value="periodPurchase" ${dispatchAudienceMode === "periodPurchase" ? "selected" : ""}>某时间段购买</option>
+                <option value="beforePurchase" ${dispatchAudienceMode === "beforePurchase" ? "selected" : ""}>某日期前购买</option>
+                <option value="currentList" ${dispatchAudienceMode === "currentList" ? "selected" : ""}>当前名单</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span>套餐</span>
+              <select class="filter-select" id="dispatchFilterPlanId" onchange="dispatchFilterPlanId=this.value; renderDispatch();">
+                ${planSelectOptions(dispatchFilterPlanId)}
+              </select>
+            </label>
+            ${dispatchAudienceMode === "beforePurchase" ? dateSingleControl("dispatchBefore", "截止日期", dispatchFilterBeforeDate) : ""}
+            ${dispatchAudienceMode === "periodPurchase" ? dateRangeControl("dispatchPurchase", "购买时间", dispatchFilterStartDate, dispatchFilterEndDate) : ""}
+            <label class="filter-item">
+              <span>状态</span>
+              <select class="filter-select" id="dispatchFilterStatus" onchange="dispatchFilterStatus=this.value; renderDispatch();">
+                <option value="全部" ${dispatchFilterStatus === "全部" ? "selected" : ""}>全部</option>
+                <option value="正常" ${dispatchFilterStatus === "正常" ? "selected" : ""}>正常</option>
+                <option value="冻结" ${dispatchFilterStatus === "冻结" ? "selected" : ""}>冻结</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span>关键字</span>
+              <input class="filter-date" id="dispatchFilterKeyword" type="text" value="${dispatchFilterKeyword}" placeholder="用户ID / 名称 / 手机号" onchange="dispatchFilterKeyword=this.value" onkeydown="if(event.key==='Enter') applyDispatchAudienceFilter()" />
+            </label>
+            ${sortControl("dispatchSort", dispatchSort, [
+              { value: "purchaseDesc", label: "购买时间倒序" },
+              { value: "purchaseAsc", label: "购买时间正序" },
+              { value: "createdDesc", label: "注册时间倒序" },
+              { value: "createdAsc", label: "注册时间正序" },
+              { value: "nameAsc", label: "用户名称升序" }
+            ])}
+            <div class="filter-actions">
+              <button class="primary-btn filter-btn" onclick="applyDispatchAudienceFilter()">查询对象</button>
+              <button class="text-btn filter-btn" onclick="resetDispatchAudienceFilter()">重置</button>
+            </div>
+          </div>
+          <div class="dispatch-hint">${dispatchAudienceModeLabel()} · ${dispatchAudienceLabel()}</div>
+          <div class="table-scroll">
+            <table class="data-table dispatch-table">
+              <colgroup>
+                <col class="col-user" />
+                <col class="col-rule" />
+                <col class="col-member" />
+                <col class="col-status" />
+                <col class="col-action" />
+              </colgroup>
+              <thead><tr><th>用户</th><th>命中规则</th><th>当前会员</th><th>状态</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                ${visibleRecipients.length ? visibleRecipients.map(user => `
+                  <tr>
+                    <td><strong>${user.name}</strong><span class="sub-text">${user.id} · ${user.phone}</span></td>
+                    <td>${dispatchMatchText(user)}</td>
+                    <td><strong>${user.member}</strong><span class="sub-text">${user.memberExpire}</span></td>
+                    <td>${statusBadge(user.status)}</td>
+                    <td class="action">${dispatchAudienceMode === "currentList" ? `<button class="text-btn" onclick="removeDispatchUser('${user.id}')">移除</button>` : "-"}</td>
+                  </tr>
+                `).join("") : `<tr><td colspan="5" class="muted">暂无符合条件的对象</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+          ${renderPager("dispatchUsers", recipients.length)}
+        </div>
+      `, "");
+    }
+
+    function renderDispatchContent() {
+      const recipients = dispatchRecipients();
+      return panel("设置发放内容", `${recipients.length} 个对象已进入发放流程`, `
+        <div class="dispatch-screen">
+          <div class="dispatch-screen-head">
+            <div class="dispatch-screen-copy">
+              <h3>发放内容</h3>
+              <span class="sub-text">${dispatchAudienceLabel()}</span>
+            </div>
+            <div class="dispatch-screen-actions">
+              <button class="text-btn" onclick="dispatchStep='audience'; renderDispatch();">${svg("i-chevron-left")}返回筛选</button>
+              <button class="primary-btn" onclick="collectDispatchForm(); dispatchStep='confirm'; renderDispatch();" ${recipients.length ? "" : "disabled"}>${svg("i-chevron-right")}进入确认</button>
+            </div>
+          </div>
+          <div class="dispatch-content-grid">
+            ${renderDispatchContentFields()}
+          </div>
+          <div class="dispatch-hint">${dispatchTypeLabel()} · ${dispatchContentText()}</div>
+        </div>
+      `, "");
+    }
+
+    function renderDispatchConfirm() {
+      const recipients = dispatchRecipients();
+      const visibleRecipients = pagedItems("dispatchUsers", recipients);
+      return panel("确认发放", "复核对象和内容后一次性发出", `
+        <div class="dispatch-screen">
+          <div class="dispatch-screen-head">
+            <div class="dispatch-screen-copy">
+              <h3>确认发放</h3>
+              <span class="sub-text">对象、套餐条件和发放内容都已锁定。</span>
+            </div>
+            <div class="dispatch-screen-actions">
+              <button class="text-btn" onclick="dispatchStep='content'; renderDispatch();">${svg("i-chevron-left")}返回内容</button>
+              <button class="primary-btn" onclick="confirmDispatch()" ${recipients.length ? "" : "disabled"}>${svg("i-send")}确认发放</button>
+            </div>
+          </div>
+          <div class="dispatch-brief">
+            <div><span>对象</span><strong>${dispatchAudienceLabel()}</strong></div>
+            <div><span>内容</span><strong>${dispatchTypeLabel()} · ${dispatchContentText()}</strong></div>
+            <div><span>数量</span><strong>${recipients.length} 人</strong></div>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table dispatch-table">
+              <colgroup>
+                <col class="col-user" />
+                <col class="col-rule" />
+                <col class="col-member" />
+                <col class="col-status" />
+                <col class="col-action" />
+              </colgroup>
+              <thead><tr><th>用户</th><th>命中规则</th><th>当前会员</th><th>状态</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                ${visibleRecipients.length ? visibleRecipients.map(user => `
+                  <tr>
+                    <td><strong>${user.name}</strong><span class="sub-text">${user.id} · ${user.phone}</span></td>
+                    <td>${dispatchMatchText(user)}</td>
+                    <td><strong>${user.member}</strong><span class="sub-text">${user.memberExpire}</span></td>
+                    <td>${statusBadge(user.status)}</td>
+                    <td class="action">${dispatchAudienceMode === "currentList" ? `<button class="text-btn" onclick="removeDispatchUser('${user.id}')">移除</button>` : "-"}</td>
+                  </tr>
+                `).join("") : `<tr><td colspan="5" class="muted">暂无符合条件的对象</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+          ${renderPager("dispatchUsers", recipients.length)}
+        </div>
+      `, "");
+    }
+
+    function renderDispatchRecords() {
+      const filteredBatches = sortDispatchBatches(dispatchBatches.filter(batch => {
+        const keyword = dispatchRecordKeyword.trim().toLowerCase();
+        const hitKeyword = !keyword || [batch.time, batch.type, batch.scope, batch.content, batch.reason, batch.status].some(value => String(value).toLowerCase().includes(keyword));
+        const hitType = dispatchRecordTypeFilter === "全部" || batch.type === dispatchRecordTypeFilter;
+        const hitDate = dateInRange(recordDate(batch.time), dispatchRecordStartDate, dispatchRecordEndDate);
+        return hitKeyword && hitType && hitDate;
+      }));
+      const visibleBatches = pagedItems("dispatchRecords", filteredBatches);
+      return panel("发放记录", "记录会员和配额的统一发放批次", `
+        <div class="filter-bar">
+          <label class="filter-item">
+            <span>关键字</span>
+            <input class="filter-date search-input" id="dispatchRecordKeyword" value="${dispatchRecordKeyword}" placeholder="对象来源 / 内容 / 原因" onkeydown="if(event.key==='Enter') applyDispatchRecordFilters()" />
+          </label>
+          <label class="filter-item">
+            <span>类型</span>
+            <select class="filter-select" id="dispatchRecordTypeFilter">
+              <option ${dispatchRecordTypeFilter === "全部" ? "selected" : ""}>全部</option>
+              ${uniqueValues(dispatchBatches.map(batch => batch.type)).map(type => `<option ${dispatchRecordTypeFilter === type ? "selected" : ""}>${type}</option>`).join("")}
+            </select>
+          </label>
+          ${dateRangeControl("dispatchRecords", "发放时间", dispatchRecordStartDate, dispatchRecordEndDate)}
+          ${sortControl("dispatchRecordSort", dispatchRecordSort, [
+            { value: "timeDesc", label: "发放时间倒序" },
+            { value: "timeAsc", label: "发放时间正序" },
+            { value: "countDesc", label: "人数多到少" },
+            { value: "countAsc", label: "人数少到多" }
+          ])}
+          <div class="filter-actions">
+            <button class="primary-btn filter-btn" onclick="applyDispatchRecordFilters()">查询</button>
+            <button class="text-btn filter-btn" onclick="resetDispatchRecordFilters()">重置</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table batch-table">
+            <colgroup>
+              <col class="col-time" />
+              <col class="col-type" />
+              <col class="col-scope" />
+              <col class="col-count" />
+              <col class="col-content" />
+              <col class="col-status" />
+              <col class="col-note" />
+            </colgroup>
+            <thead><tr><th>时间</th><th>类型</th><th>对象来源</th><th>人数</th><th>发放内容</th><th>状态</th><th>原因</th></tr></thead>
+            <tbody>
+              ${visibleBatches.length ? visibleBatches.map(batch => `
+                <tr>
+                  <td>${batch.time}</td>
+                  <td>${batch.type}</td>
+                  <td>${batch.scope}</td>
+                  <td>${batch.count} 人</td>
+                  <td>${batch.content}</td>
+                  <td><span class="badge ok">${batch.status}</span></td>
+                  <td>${batch.reason}</td>
+                </tr>
+              `).join("") : `<tr><td colspan="7" class="muted">暂无符合条件的发放记录</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+        ${renderPager("dispatchRecords", filteredBatches.length)}
+      `);
+    }
+
+    function applyDispatchRecordFilters() {
+      dispatchRecordKeyword = document.getElementById("dispatchRecordKeyword")?.value.trim() || "";
+      dispatchRecordTypeFilter = document.getElementById("dispatchRecordTypeFilter")?.value || "全部";
+      dispatchRecordSort = document.getElementById("dispatchRecordSort")?.value || dispatchRecordSort;
+      if (dispatchRecordStartDate && dispatchRecordEndDate && dispatchRecordStartDate > dispatchRecordEndDate) {
+        showToast("发放时间范围无效");
+        return;
+      }
+      tablePages.dispatchRecords = 1;
+      renderDispatch();
+    }
+
+    function resetDispatchRecordFilters() {
+      dispatchRecordKeyword = "";
+      dispatchRecordTypeFilter = "全部";
+      dispatchRecordStartDate = "";
+      dispatchRecordEndDate = "";
+      dispatchRecordSort = "timeDesc";
+      tablePages.dispatchRecords = 1;
+      renderDispatch();
+    }
+
+    function renderDispatch() {
+      root.innerHTML = `
+        <div class="view-stack">
+          ${renderDispatchTabs()}
+          ${dispatchTab === "create"
+            ? renderDispatchStepBar() + (dispatchStep === "audience" ? renderDispatchAudience() : dispatchStep === "content" ? renderDispatchContent() : renderDispatchConfirm())
+            : renderDispatchRecords()}
+        </div>
+      `;
+    }
+
+    function removeDispatchUser(userId) {
+      dispatchUserIds = dispatchUserIds.filter(id => id !== userId);
+      tablePages.dispatchUsers = 1;
+      renderDispatch();
+    }
+
+    function applyDispatchAudienceFilter() {
+      dispatchAudienceMode = document.getElementById("dispatchAudienceMode")?.value || dispatchAudienceMode;
+      dispatchFilterPlanId = document.getElementById("dispatchFilterPlanId")?.value || dispatchFilterPlanId;
+      dispatchFilterStatus = document.getElementById("dispatchFilterStatus")?.value || dispatchFilterStatus;
+      dispatchFilterKeyword = document.getElementById("dispatchFilterKeyword")?.value || dispatchFilterKeyword;
+      dispatchSort = document.getElementById("dispatchSort")?.value || dispatchSort;
+      if (dispatchAudienceMode === "periodPurchase" && dispatchFilterStartDate && dispatchFilterEndDate && dispatchFilterStartDate > dispatchFilterEndDate) {
+        showToast("购买时间范围无效");
+        return;
+      }
+      if (dispatchAudienceMode === "currentList") {
+        dispatchFilterStatus = dispatchFilterStatus || "全部";
+      }
+      tablePages.dispatchUsers = 1;
+      renderDispatch();
+    }
+
+    function resetDispatchAudienceFilter() {
+      dispatchAudienceMode = "periodPurchase";
+      dispatchFilterPlanId = "plus";
+      dispatchFilterStartDate = "2026-05-01";
+      dispatchFilterEndDate = "2026-05-31";
+      dispatchFilterBeforeDate = "2026-06-01";
+      dispatchFilterStatus = "正常";
+      dispatchFilterKeyword = "";
+      dispatchSort = "purchaseDesc";
+      tablePages.dispatchUsers = 1;
+      renderDispatch();
+    }
+
+    function confirmDispatch() {
+      collectDispatchForm();
+      const recipients = dispatchRecipients();
+      if (!recipients.length) {
+        showToast("请先确定发放对象");
+        return;
+      }
+      const content = dispatchContentText();
+      dispatchBatches.unshift({
+        time: nowText(),
+        type: "权益发放",
+        scope: dispatchAudienceLabel(),
+        count: recipients.length,
+        content,
+        reason: dispatchReason || "-",
+        status: "已完成"
+      });
+      if (["benefit", "member"].includes(dispatchType)) {
+        recipients.forEach(user => {
+          const before = `${user.member} / ${user.memberExpire}`;
+          user.member = "会员";
+          user.memberExpire = addDays(user.memberExpire, Math.max(1, Number(dispatchMemberDays) || 1));
+          addChangeRecord(user, "统一发放会员", before, `会员至 ${user.memberExpire}`, dispatchReason || "-");
+        });
+      }
+      dispatchTab = "records";
+      dispatchStep = "audience";
+      tablePages.dispatchRecords = 1;
+      renderApp();
+      showToast(`已发放给 ${recipients.length} 个用户`);
+    }
+
+    function collectDispatchForm() {
+      dispatchType = document.getElementById("dispatchType")?.value || dispatchType;
+      dispatchReason = document.getElementById("dispatchReason")?.value.trim() || dispatchReason;
+      dispatchMemberDays = document.getElementById("dispatchMemberDays")?.value || dispatchMemberDays;
+      dispatchHours = document.getElementById("dispatchHours")?.value || dispatchHours;
+      dispatchQa = document.getElementById("dispatchQa")?.value || dispatchQa;
+      dispatchManualText = document.getElementById("dispatchManualText")?.value || dispatchManualText;
+    }
+
+    function renderChanges() {
+      const filteredRecords = sortChangeRecords(changeRecords.filter(record => {
+        const keyword = changeKeyword.trim().toLowerCase();
+        const user = userById(record.userId);
+        const hitKeyword = !keyword || [record.time, record.userId, user?.name, record.type, record.before, record.after, record.note].some(value => String(value || "").toLowerCase().includes(keyword));
+        const hitType = changeTypeFilter === "全部" || record.type === changeTypeFilter;
+        const hitDate = dateInRange(recordDate(record.time), changeStartDate, changeEndDate);
+        return hitKeyword && hitType && hitDate;
+      }));
+      const visibleRecords = pagedItems("changes", filteredRecords);
+      root.innerHTML = panel("套餐变更记录", "记录后台对会员、冻结和当月套餐的调整", `
+        <div class="filter-bar">
+          <label class="filter-item">
+            <span>关键字</span>
+            <input class="filter-date search-input" id="changeKeyword" value="${changeKeyword}" placeholder="用户 / 类型 / 备注" onkeydown="if(event.key==='Enter') applyChangeFilters()" />
+          </label>
+          <label class="filter-item">
+            <span>类型</span>
+            <select class="filter-select" id="changeTypeFilter">
+              <option ${changeTypeFilter === "全部" ? "selected" : ""}>全部</option>
+              ${uniqueValues(changeRecords.map(record => record.type)).map(type => `<option ${changeTypeFilter === type ? "selected" : ""}>${type}</option>`).join("")}
+            </select>
+          </label>
+          ${dateRangeControl("changes", "变更时间", changeStartDate, changeEndDate)}
+          ${sortControl("changeSort", changeSort, [
+            { value: "timeDesc", label: "变更时间倒序" },
+            { value: "timeAsc", label: "变更时间正序" },
+            { value: "userAsc", label: "用户ID升序" },
+            { value: "userDesc", label: "用户ID降序" }
+          ])}
+          <div class="filter-actions">
+            <button class="primary-btn filter-btn" onclick="applyChangeFilters()">查询</button>
+            <button class="text-btn filter-btn" onclick="resetChangeFilters()">重置</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table records-table">
+            <colgroup>
+              <col class="col-time" />
+              <col class="col-user" />
+              <col class="col-type" />
+              <col class="col-before" />
+              <col class="col-after" />
+              <col class="col-note" />
+            </colgroup>
+            <thead><tr><th>时间</th><th>用户</th><th>类型</th><th>调整前</th><th>调整后</th><th>备注</th></tr></thead>
+            <tbody>
+              ${visibleRecords.length ? visibleRecords.map(record => `
+                <tr>
+                  <td>${record.time}</td>
+                  <td><strong>${userName(record.userId)}</strong><span class="sub-text">${record.userId}</span></td>
+                  <td>${record.type}</td>
+                  <td>${record.before}</td>
+                  <td>${record.after}</td>
+                  <td>${record.note}</td>
+                </tr>
+              `).join("") : `<tr><td colspan="6" class="muted">暂无符合条件的变更记录</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+        ${renderPager("changes", filteredRecords.length)}
+      `);
+    }
+
+    function applyChangeFilters() {
+      changeKeyword = document.getElementById("changeKeyword")?.value.trim() || "";
+      changeTypeFilter = document.getElementById("changeTypeFilter")?.value || "全部";
+      changeSort = document.getElementById("changeSort")?.value || changeSort;
+      if (changeStartDate && changeEndDate && changeStartDate > changeEndDate) {
+        showToast("变更时间范围无效");
+        return;
+      }
+      tablePages.changes = 1;
+      renderChanges();
+    }
+
+    function resetChangeFilters() {
+      changeKeyword = "";
+      changeTypeFilter = "全部";
+      changeStartDate = "";
+      changeEndDate = "";
+      changeSort = "timeDesc";
+      tablePages.changes = 1;
+      renderChanges();
+    }
+
+    function renderCurrentView() {
+      if (currentView === "users") renderUsers();
+      if (currentView === "detail") renderDetail();
+      if (currentView === "data") renderData();
+      if (currentView === "orders") renderOrders();
+      if (currentView === "dispatch") renderDispatch();
+      if (currentView === "announcements") renderAnnouncements();
+      if (currentView === "pricing") renderPricing();
+      if (currentView === "changes") renderChanges();
+    }
+
+    function renderApp() {
+      renderNav();
+      setPageMeta();
+      renderCurrentView();
+    }
+
+    function addDays(dateStr, days) {
+      const base = dateStr === "-" ? new Date() : new Date(`${dateStr}T00:00:00`);
+      if (Number.isNaN(base.getTime())) return dateStr;
+      base.setDate(base.getDate() + days);
+      const year = base.getFullYear();
+      const month = String(base.getMonth() + 1).padStart(2, "0");
+      const day = String(base.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function openModal() {
+      modalBackdrop.classList.add("open");
+      const firstInput = modalBody.querySelector("input,select,textarea");
+      setTimeout(() => firstInput?.focus(), 50);
+    }
+
+    function setModalLayout(size = "", bodyClass = "") {
+      modal.className = `modal ${size}`.trim();
+      modalBody.className = `modal-body ${bodyClass}`.trim();
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.remove("open");
+      setModalLayout();
+      currentModal = null;
+      modalContext = null;
+    }
+
+    function openFreezeModal(user) {
+      currentModal = user.status === "冻结" ? "unfreezeUser" : "freezeUser";
+      modalContext = user;
+      setModalLayout("modal-wide", "single-form");
+      modalTitle.textContent = `${user.status === "冻结" ? "解除冻结" : "冻结用户"} - ${user.name}`;
+      modalBody.innerHTML = user.status === "冻结" ? `
+        <div class="form-note">解除冻结后，该用户恢复正常状态。</div>
+        <div class="form-item full"><label>备注</label><textarea id="freezeNote" placeholder="可填写解除冻结说明"></textarea></div>
+      ` : `
+        <div class="form-note warn">冻结后，该用户状态会变为冻结。这里仅做原型记录，不连接真实账号权限。</div>
+        <div class="form-item full"><label>冻结原因</label><select id="freezeReason"><option>异常使用</option><option>人工处理</option><option>用户申请</option><option>其他</option></select></div>
+        <div class="form-item full"><label>备注</label><textarea id="freezeNote" placeholder="可补充具体原因"></textarea></div>
+      `;
+      openModal();
+    }
+
+    function openGiftMemberModal(user) {
+      currentModal = "giftMember";
+      modalContext = user;
+      setModalLayout("modal-wide", "triple-form");
+      modalTitle.textContent = `赠送权益 - ${user.name}`;
+      modalBody.innerHTML = `
+        <div class="form-item"><label>会员天数</label><input id="giftDays" type="number" min="0" value="30" /></div>
+        <div class="form-item"><label>转写时长/小时</label><input id="giftHours" type="number" min="0" value="0" /></div>
+        <div class="form-item"><label>问答次数</label><input id="giftQa" type="number" min="0" value="0" /></div>
+        <div class="form-item full"><label>备注</label><textarea id="giftNote" placeholder="例如：人工补偿、活动赠送"></textarea></div>
+      `;
+      openModal();
+    }
+
+    function openEditMemberModal(user) {
+      currentModal = "editMember";
+      modalContext = user;
+      setModalLayout();
+      modalTitle.textContent = `修改会员 - ${user.name}`;
+      modalBody.innerHTML = `
+        <div class="form-item"><label>会员类型</label><select id="memberLevel"><option ${user.member === "无会员" ? "selected" : ""}>无会员</option><option ${user.member === "会员" ? "selected" : ""}>会员</option></select></div>
+        <div class="form-item"><label>会员到期</label><input id="memberExpire" type="date" value="${user.memberExpire === "-" ? "" : user.memberExpire}" /></div>
+      `;
+      openModal();
+    }
+
+    function openChangePlanModal(user) {
+      currentModal = "changePlan";
+      modalContext = user;
+      setModalLayout("modal-wide", "single-form");
+      modalTitle.textContent = `更改此人此月套餐 - ${user.name}`;
+      const availablePlans = plans.filter(plan => plan.enabled || plan.id === user.monthPlanId);
+      modalBody.innerHTML = `
+        <div class="form-note">此操作只影响此人当前月份套餐，不修改固定套餐定价，也不影响其他用户。</div>
+        <div class="form-item full"><label>本月套餐</label><select id="monthPlan">${availablePlans.map(plan => `<option value="${plan.id}" ${plan.id === user.monthPlanId ? "selected" : ""}>${plan.name}：${planText(plan)}${plan.enabled ? "" : "（已停用，仅当前用户保留）"}</option>`).join("")}</select></div>
+      `;
+      openModal();
+    }
+
+    function openAnnouncementModal(item = null) {
+      currentModal = "announcement";
+      modalContext = item;
+      const draft = item || {
+        title: "",
+        audience: "全部用户",
+        status: "草稿",
+        expireAt: "",
+        pinned: false,
+        content: ""
+      };
+      setModalLayout("modal-wide", "triple-form");
+      modalTitle.textContent = item ? `编辑公告 - ${item.id}` : "新建公告";
+      modalBody.innerHTML = `
+        <div class="form-item full"><label>公告标题</label><input id="announcementTitle" value="${escapeHtml(draft.title)}" placeholder="例如：套餐权益调整说明" /></div>
+        <div class="form-item"><label>接收范围</label><select id="announcementAudience">${announcementAudiences.map(value => `<option value="${value}" ${draft.audience === value ? "selected" : ""}>${value}</option>`).join("")}</select></div>
+        <div class="form-item"><label>状态</label><select id="announcementStatus"><option ${draft.status === "草稿" ? "selected" : ""}>草稿</option><option ${draft.status === "已发布" ? "selected" : ""}>已发布</option><option ${draft.status === "已下线" ? "selected" : ""}>已下线</option></select></div>
+        <div class="form-item"><label>有效期</label><input id="announcementExpireAt" type="date" value="${escapeHtml(draft.expireAt)}" /></div>
+        <label class="check-line"><input id="announcementPinned" type="checkbox" ${draft.pinned ? "checked" : ""} />置顶展示</label>
+        <div class="form-item full"><label>公告内容</label><textarea id="announcementContent" placeholder="填写要在 App 内展示的公告内容">${escapeHtml(draft.content)}</textarea></div>
+      `;
+      openModal();
+    }
+
+    function openEditPlanModal(plan) {
+      currentModal = "editPlan";
+      modalContext = plan;
+      setModalLayout("modal-wide", "triple-form");
+      modalTitle.textContent = `修改套餐定价 - ${plan.name}`;
+      modalBody.innerHTML = `
+        <div class="form-note warn">修改套餐定价会影响后续选择该套餐时展示的价格和配额。原型暂不做套餐版本管理。</div>
+        <div class="form-item"><label>价格</label><input id="planPrice" type="number" min="0" value="${plan.price}" /></div>
+        <div class="form-item"><label>转写时长/小时</label><input id="planHours" type="number" min="0" value="${plan.hours}" /></div>
+        <div class="form-item"><label>知识库问答/次</label><input id="planQa" type="number" min="0" value="${plan.qa}" /></div>
+        <label class="check-line"><input id="planConfirm" type="checkbox" />已确认修改该套餐的价格和配额</label>
+      `;
+      openModal();
+    }
+
+    function togglePlanEnabled(plan) {
+      plan.enabled = !plan.enabled;
+      showToast(`${plan.name} 已${plan.enabled ? "启用" : "停用"}`);
+      renderApp();
+    }
+
+    function saveModal() {
+      if (currentModal === "freezeUser") {
+        const reason = document.getElementById("freezeReason").value;
+        const note = document.getElementById("freezeNote").value.trim();
+        modalContext.status = "冻结";
+        modalContext.freezeReason = reason;
+        addChangeRecord(modalContext, "冻结用户", "正常", "冻结", note || reason);
+        showToast(`${modalContext.name} 已冻结`);
+      }
+      if (currentModal === "unfreezeUser") {
+        const note = document.getElementById("freezeNote").value.trim();
+        const before = modalContext.freezeReason || "冻结";
+        modalContext.status = "正常";
+        modalContext.freezeReason = "";
+        addChangeRecord(modalContext, "解除冻结", before, "正常", note || "-");
+        showToast(`${modalContext.name} 已解除冻结`);
+      }
+      if (currentModal === "giftMember") {
+        const days = Math.max(0, Number(document.getElementById("giftDays").value || 0));
+        const hours = Math.max(0, Number(document.getElementById("giftHours").value || 0));
+        const qa = Math.max(0, Number(document.getElementById("giftQa").value || 0));
+        const note = document.getElementById("giftNote").value.trim();
+        if (!days && !hours && !qa) {
+          showToast("请填写赠送内容");
+          return;
+        }
+        const before = `${modalContext.member} / ${modalContext.memberExpire}`;
+        const afterParts = [];
+        if (days) {
+          modalContext.member = "会员";
+          modalContext.memberExpire = addDays(modalContext.memberExpire, days);
+          afterParts.push(`会员至 ${modalContext.memberExpire}`);
+        }
+        if (hours) afterParts.push(`转写 +${hours}小时`);
+        if (qa) afterParts.push(`问答 +${qa}次`);
+        const after = afterParts.join("，");
+        addChangeRecord(modalContext, "赠送权益", before, after, note || after);
+        showToast(`${modalContext.name} 已赠送权益`);
+      }
+      if (currentModal === "editMember") {
+        const before = `${modalContext.member} / ${modalContext.memberExpire}`;
+        modalContext.member = document.getElementById("memberLevel").value;
+        modalContext.memberExpire = document.getElementById("memberExpire").value || "-";
+        addChangeRecord(modalContext, "修改会员", before, `${modalContext.member} / ${modalContext.memberExpire}`, "-");
+        showToast(`${modalContext.name} 的会员已修改`);
+      }
+      if (currentModal === "changePlan") {
+        const beforePlan = planById(modalContext.monthPlanId).name;
+        modalContext.monthPlanId = document.getElementById("monthPlan").value;
+        const afterPlan = planById(modalContext.monthPlanId).name;
+        addChangeRecord(modalContext, "更改当月套餐", beforePlan, afterPlan, "仅影响此人本月套餐");
+        showToast(`${modalContext.name} 的本月套餐已更改`);
+      }
+      if (currentModal === "editPlan") {
+        if (!document.getElementById("planConfirm").checked) {
+          showToast("请先确认套餐修改");
+          return;
+        }
+        modalContext.price = Number(document.getElementById("planPrice").value || modalContext.price);
+        modalContext.hours = Number(document.getElementById("planHours").value || modalContext.hours);
+        modalContext.qa = Number(document.getElementById("planQa").value || modalContext.qa);
+        showToast(`${modalContext.name} 已保存`);
+      }
+      if (currentModal === "announcement") {
+        const title = document.getElementById("announcementTitle").value.trim();
+        const audience = document.getElementById("announcementAudience").value;
+        const status = document.getElementById("announcementStatus").value;
+        const expireAt = document.getElementById("announcementExpireAt").value;
+        const pinned = document.getElementById("announcementPinned").checked;
+        const content = document.getElementById("announcementContent").value.trim();
+        if (!title) {
+          showToast("请填写公告标题");
+          return;
+        }
+        if (!content) {
+          showToast("请填写公告内容");
+          return;
+        }
+        const isNew = !modalContext;
+        const item = modalContext || {
+          id: nextAnnouncementId(),
+          publishAt: "-",
+          targetCount: 0,
+          readCount: 0
+        };
+        const previousStatus = item.status;
+        const previousAudience = item.audience;
+        item.title = title;
+        item.audience = audience;
+        item.status = status;
+        item.expireAt = expireAt || "-";
+        item.pinned = pinned;
+        item.content = content;
+        if (status === "草稿") {
+          item.publishAt = "-";
+          item.targetCount = 0;
+          item.readCount = 0;
+        }
+        if (status === "已发布") {
+          if (previousStatus !== "已发布" || !item.publishAt || item.publishAt === "-") item.publishAt = nowText();
+          if (isNew || previousAudience !== audience || !item.targetCount) item.targetCount = announcementTargetCount(audience);
+          item.readCount = Math.min(Number(item.readCount) || 0, item.targetCount);
+        }
+        if (status === "已下线" && isNew) {
+          item.publishAt = "-";
+          item.targetCount = 0;
+          item.readCount = 0;
+        }
+        if (isNew) announcements.unshift(item);
+        showToast(`${title} 已保存`);
+      }
+      closeModal();
+      renderApp();
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 3200);
+    }
+
+    document.getElementById("closeModal").addEventListener("click", closeModal);
+    document.getElementById("cancelModal").addEventListener("click", closeModal);
+    document.getElementById("saveModal").addEventListener("click", saveModal);
+    modalBackdrop.addEventListener("click", event => {
+      if (event.target === modalBackdrop) closeModal();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && modalBackdrop.classList.contains("open")) closeModal();
+    });
+
+    renderApp();
+  </script>
+</body>
+</html>

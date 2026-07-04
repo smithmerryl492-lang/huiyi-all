@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MeetingTask",
+  "type": "object",
+  "required": ["id", "file_id", "title", "source", "status", "created_at", "updated_at"],
+  "properties": {
+    "id": { "type": "string" },
+    "file_id": { "type": "string" },
+    "client_task_id": { "type": ["string", "null"] },
+    "title": { "type": "string" },
+    "source": { "type": "string", "enum": ["recording", "import"] },
+    "status": { "type": "string", "enum": ["waiting_process", "processing", "finished", "failed"] },
+    "error_message": { "type": ["string", "null"] },
+    "confirmed": { "type": "boolean" },
+    "created_at_millis": { "type": ["integer", "null"] },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" }
+  }
+}

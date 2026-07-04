@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MeetingProcessingResult",
+  "type": "object",
+  "required": ["task_id", "source_file_path", "summary", "decisions", "todos", "transcripts", "generated_at"],
+  "properties": {
+    "task_id": { "type": "string" },
+    "source_file_path": { "type": "string" },
+    "summary": { "type": "string" },
+    "decisions": { "type": "array", "items": { "type": "string" } },
+    "todos": { "type": "array", "items": { "type": "object" } },
+    "transcripts": { "type": "array", "items": { "type": "object" } },
+    "generated_at": { "type": "string" }
+  }
+}
+

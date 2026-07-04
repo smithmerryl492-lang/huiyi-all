@@ -1,0 +1,3381 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>鲲穹智能会议 APP 高保真 UI/UE 交互原型</title>
+  <script src="lucide.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f7f9;
+      --ink: #172026;
+      --muted: #6a747c;
+      --line: #e1e7ec;
+      --soft: #eef4f4;
+      --teal: #0e9f8f;
+      --teal-weak: #dff5f1;
+      --coral: #ff6b4a;
+      --amber: #f5a524;
+      --indigo: #4452c7;
+      --green: #19a766;
+      --white: #ffffff;
+      --shadow: 0 24px 70px rgba(20, 35, 45, 0.16);
+      --radius: 8px;
+      --phone-w: 390px;
+      --phone-h: 844px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, rgba(14, 159, 143, 0.06) 0 1px, transparent 1px 80px),
+        linear-gradient(0deg, rgba(68, 82, 199, 0.04) 0 1px, transparent 1px 80px),
+        var(--bg);
+      overflow-x: hidden;
+    }
+
+    button, input, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto minmax(280px, 420px);
+      gap: 28px;
+      padding: 28px;
+      align-items: center;
+    }
+
+    .design-brief,
+    .inspector {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .brief-card,
+    .panel {
+      background: rgba(255,255,255,0.82);
+      border: 1px solid rgba(225,231,236,0.9);
+      box-shadow: 0 12px 40px rgba(40, 52, 62, 0.08);
+      border-radius: var(--radius);
+      padding: 22px;
+      backdrop-filter: blur(12px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .brief-card p {
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 14px 0 0;
+      font-size: 15px;
+    }
+
+    .brief-metrics {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      padding: 12px;
+      border-radius: var(--radius);
+      background: var(--soft);
+      border: 1px solid #dbe8e7;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .phone-stage {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .phone {
+      width: var(--phone-w);
+      height: var(--phone-h);
+      border-radius: 42px;
+      background: #15191d;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .phone::before {
+      content: "";
+      position: absolute;
+      width: 122px;
+      height: 28px;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 0 0 18px 18px;
+      background: #15191d;
+      z-index: 4;
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      border-radius: 32px;
+      overflow: hidden;
+      background: #f8fafb;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .statusbar {
+      height: 48px;
+      padding: 14px 22px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: #24313a;
+      flex: 0 0 auto;
+      background: #f8fafb;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #26333c;
+    }
+
+    .screen {
+      display: none;
+      min-height: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
+      flex-direction: column;
+      background: #f8fafb;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    .content {
+      padding: 0 18px 86px;
+      overflow-y: auto;
+      scrollbar-width: none;
+      min-height: 0;
+    }
+
+    .content::-webkit-scrollbar { display: none; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 18px 12px;
+      gap: 12px;
+      flex: 0 0 auto;
+      background: #f8fafb;
+      z-index: 2;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: #122b2d;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 15px;
+      flex: 0 0 auto;
+    }
+
+    .brand-title {
+      min-width: 0;
+    }
+
+    .brand-title b {
+      display: block;
+      font-size: 18px;
+      line-height: 1.1;
+    }
+
+    .brand-title span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: #26333c;
+      flex: 0 0 auto;
+    }
+
+    .hero-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .primary-action,
+    .secondary-action {
+      min-height: 106px;
+      border-radius: var(--radius);
+      padding: 14px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid transparent;
+    }
+
+    .primary-action {
+      background: #123337;
+      color: white;
+      grid-column: 1 / -1;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .secondary-action {
+      background: #fff;
+      color: #1f2d35;
+      border-color: var(--line);
+    }
+
+    .action-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.16);
+    }
+
+    .secondary-action .action-icon {
+      background: var(--teal-weak);
+      color: var(--teal);
+    }
+
+    .action-copy strong {
+      display: block;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .action-copy span {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.72);
+      line-height: 1.35;
+    }
+
+    .secondary-action .action-copy span {
+      color: var(--muted);
+    }
+
+    .home-record-copy {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .record-visual {
+      min-width: 112px;
+      min-height: 76px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.10);
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 9px;
+      flex: 0 0 auto;
+    }
+
+    .mini-wave {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mini-wave span {
+      width: 4px;
+      border-radius: 999px;
+      background: #7df0e4;
+      animation: pulse 1.35s ease-in-out infinite;
+    }
+
+    .mini-wave span:nth-child(1) { height: 12px; animation-delay: .05s; }
+    .mini-wave span:nth-child(2) { height: 22px; animation-delay: .18s; }
+    .mini-wave span:nth-child(3) { height: 16px; animation-delay: .31s; }
+    .mini-wave span:nth-child(4) { height: 28px; animation-delay: .44s; }
+    .mini-wave span:nth-child(5) { height: 18px; animation-delay: .57s; }
+    .mini-wave span:nth-child(6) { height: 24px; animation-delay: .70s; }
+
+    .ai-chip {
+      height: 22px;
+      border-radius: 8px;
+      padding: 0 8px;
+      display: inline-flex;
+      align-items: center;
+      background: #d6fbf4;
+      color: #087568;
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 20px 0 10px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .section-head button {
+      color: var(--teal);
+      font-size: 12px;
+      background: none;
+      padding: 4px;
+    }
+
+    .calendar-card,
+    .meeting-card,
+    .task-card,
+    .source-card,
+    .setting-card,
+    .summary-card,
+    .chat-bubble {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 22px rgba(38, 55, 67, 0.05);
+    }
+
+    .calendar-card {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .time-pill {
+      width: 54px;
+      padding: 7px 0;
+      border-radius: 8px;
+      background: #fff3e9;
+      color: #a64220;
+      text-align: center;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .card-title {
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .card-subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+
+    .mini-btn {
+      height: 32px;
+      padding: 0 11px;
+      border-radius: 8px;
+      background: var(--teal);
+      color: white;
+      font-weight: 700;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .meeting-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .swipe-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      touch-action: pan-y;
+    }
+
+    .swipe-action {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 86px;
+      border-radius: var(--radius) 0 0 var(--radius);
+      background: #f35f45;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 900;
+      z-index: 0;
+    }
+
+    .swipe-item .meeting-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      transition: transform 0.18s ease;
+    }
+
+    .swipe-item.revealed .meeting-card {
+      transform: translateX(86px);
+    }
+
+    .create-meeting-card {
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px dashed #9fdad3;
+      border-radius: var(--radius);
+      background: #f4fbfa;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      text-align: left;
+      width: 100%;
+    }
+
+    .create-meeting-card b {
+      display: block;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .create-meeting-card span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .meeting-card {
+      padding: 13px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .meeting-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 8px;
+      background: #eef4f4;
+      color: #4a5962;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .tag.teal { background: var(--teal-weak); color: #087568; }
+    .tag.coral { background: #fff0ec; color: #b74327; }
+    .tag.indigo { background: #eef0ff; color: #3f48a6; }
+    .tag.amber { background: #fff6dc; color: #8d6500; }
+
+    .progress {
+      height: 6px;
+      border-radius: 999px;
+      background: #edf1f4;
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      background: var(--teal);
+      border-radius: inherit;
+    }
+
+    .background-generate-card {
+      display: none;
+      padding: 14px;
+      border-radius: var(--radius);
+      margin-top: 12px;
+      color: #fff;
+      background: linear-gradient(135deg, #123337 0%, #0c897c 100%);
+      box-shadow: 0 16px 34px rgba(18, 51, 55, 0.18);
+    }
+
+    .background-generate-card.active {
+      display: grid;
+      gap: 10px;
+    }
+
+    .background-generate-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .background-generate-head b,
+    .background-generate-head span {
+      display: block;
+    }
+
+    .background-generate-head b {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .background-generate-head span {
+      margin-top: 4px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.78);
+      line-height: 1.4;
+    }
+
+    .background-generate-card .progress {
+      background: rgba(255,255,255,0.22);
+    }
+
+    .background-generate-card .progress span {
+      background: #80f2e4;
+    }
+
+    .bottom-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 74px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(16px);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 8px 14px 12px;
+      z-index: 7;
+    }
+
+    .bottom-nav.hidden {
+      display: none;
+    }
+
+    .tab {
+      display: grid;
+      place-items: center;
+      gap: 3px;
+      background: transparent;
+      color: #7b858c;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 8px;
+    }
+
+    .tab.active {
+      color: var(--teal);
+      background: #edf8f6;
+    }
+
+    .tab i,
+    .tab svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .record-screen {
+      background: #11282b;
+      color: #fff;
+    }
+
+    .record-screen .statusbar,
+    .record-screen .topbar {
+      background: #11282b;
+      color: #fff;
+    }
+
+    .record-screen .icon-btn {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border-color: rgba(255,255,255,0.14);
+    }
+
+    .record-screen .brand-title span {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .record-content {
+      padding: 0 18px 24px;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .record-content::-webkit-scrollbar { display: none; }
+
+    .record-meter {
+      margin: 8px 0 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+
+    .record-meter.paused .live-dot {
+      color: #ffe2a3;
+    }
+
+    .record-meter.paused .live-dot::before {
+      background: var(--amber);
+      box-shadow: 0 0 0 6px rgba(245,165,36,0.14);
+    }
+
+    .record-meter.paused .wave span {
+      animation-play-state: paused;
+      opacity: 0.28;
+    }
+
+    .recording-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .live-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #ffb7a8;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .live-dot::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--coral);
+      box-shadow: 0 0 0 6px rgba(255,107,74,0.15);
+    }
+
+    .timer {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .wave {
+      display: grid;
+      grid-template-columns: repeat(36, 1fr);
+      gap: 3px;
+      height: 46px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .wave span {
+      display: block;
+      border-radius: 999px;
+      background: #62d2c5;
+      height: var(--h);
+      opacity: 0.82;
+      animation: pulse 1.6s ease-in-out infinite;
+      animation-delay: var(--d);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scaleY(0.62); opacity: 0.55; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    .transcript {
+      display: grid;
+      gap: 10px;
+    }
+
+    .line {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+
+    .speaker {
+      display: flex;
+      justify-content: space-between;
+      color: rgba(255,255,255,0.68);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .line p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.95);
+    }
+
+    .line.focused {
+      border-color: rgba(125,240,228,0.58);
+      box-shadow: inset 0 0 0 1px rgba(125,240,228,0.16);
+    }
+
+    .focus-note,
+    .record-state-banner {
+      display: none;
+      margin-top: 10px;
+      border-radius: 8px;
+      padding: 10px;
+      color: rgba(255,255,255,0.92);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.45;
+      background: rgba(255,255,255,0.11);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .focus-note.active,
+    .record-state-banner.active {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .line .focus-flag {
+      margin-top: 9px;
+      min-height: 28px;
+      padding: 0 9px;
+      border-radius: 8px;
+      background: rgba(125,240,228,0.14);
+      color: #9cf6ec;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .record-actions {
+      position: sticky;
+      bottom: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr;
+      gap: 10px;
+      padding-top: 12px;
+      background: linear-gradient(180deg, rgba(17,40,43,0), #11282b 20%);
+    }
+
+    .record-actions button {
+      height: 44px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-weight: 800;
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .record-actions .danger {
+      background: var(--coral);
+      border-color: transparent;
+    }
+
+    .detail-header {
+      padding: 0 18px 10px;
+    }
+
+    .detail-title {
+      font-size: 21px;
+      font-weight: 900;
+      line-height: 1.22;
+      margin: 0 0 8px;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      padding: 4px;
+      border-radius: var(--radius);
+      background: #edf2f3;
+      margin: 10px 18px 0;
+      flex: 0 0 auto;
+    }
+
+    .segmented button {
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
+      color: #66747c;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .segmented button.active {
+      background: #fff;
+      color: var(--teal);
+      box-shadow: 0 3px 10px rgba(31, 45, 53, 0.08);
+    }
+
+    .detail-panel {
+      display: none;
+      animation: panelIn 0.18s ease both;
+    }
+
+    .detail-panel.active {
+      display: block;
+    }
+
+    @keyframes panelIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .detail-overview {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .overview-pill {
+      padding: 10px 8px;
+      border-radius: 12px;
+      background: #f5faf9;
+      border: 1px solid #dcebea;
+      text-align: center;
+    }
+
+    .overview-pill strong {
+      display: block;
+      font-size: 16px;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .overview-pill span {
+      display: block;
+      margin-top: 5px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .insight-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .insight-item {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .insight-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .insight-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.45;
+      color: var(--ink);
+    }
+
+    .insight-desc {
+      margin: 8px 0 0;
+      font-size: 13px;
+      line-height: 1.62;
+      color: #3d4c54;
+    }
+
+    .inline-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .ghost-action {
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: #f5f7f7;
+      color: #51616a;
+      font-size: 12px;
+      font-weight: 850;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .risk-level {
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .risk-level.high {
+      background: #fff0ec;
+      color: #b74327;
+    }
+
+    .risk-level.medium {
+      background: #fff6dc;
+      color: #8d6500;
+    }
+
+    .risk-level.low {
+      background: #eef8f6;
+      color: var(--teal);
+    }
+
+    .detail-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .info-cell {
+      padding: 10px;
+      border-radius: 10px;
+      background: #f6f8f8;
+      border: 1px solid #e5ecec;
+    }
+
+    .info-cell span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .info-cell b {
+      display: block;
+      margin-top: 4px;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .speaker-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .speaker-line {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .speaker-name {
+      min-width: 70px;
+      height: 30px;
+      border-radius: 999px;
+      padding: 0 10px;
+      background: #edf8f6;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .speaker-copy {
+      min-width: 0;
+    }
+
+    .speaker-meta {
+      display: flex;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .speaker-copy p {
+      margin: 0;
+      color: #2f3d45;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .data-loop {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .loop-step {
+      padding: 9px 6px;
+      border-radius: 10px;
+      background: #f7faf9;
+      border: 1px solid #dfe9e7;
+      text-align: center;
+    }
+
+    button.loop-step {
+      width: 100%;
+    }
+
+    .loop-step i {
+      width: 17px;
+      height: 17px;
+      color: var(--teal);
+    }
+
+    .loop-step span {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 900;
+      color: #43515a;
+    }
+
+    .summary-card {
+      padding: 14px;
+      margin-top: 12px;
+      position: relative;
+    }
+
+    .summary-card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .summary-card p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #2f3d45;
+    }
+
+    .evidence-btn {
+      margin-top: 10px;
+      height: 32px;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: #eef8f6;
+      color: var(--teal);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .edit-pencil {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: #eef8f6;
+      color: var(--teal);
+      display: grid;
+      place-items: center;
+    }
+
+    .action-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: #fff;
+      margin-top: 10px;
+    }
+
+    .check {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      border: 2px solid #cbd5db;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      flex: 0 0 auto;
+    }
+
+    .action-item.done .check {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .action-item.done .action-main {
+      color: #7a858c;
+      text-decoration: line-through;
+    }
+
+    .action-main {
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .action-meta {
+      margin-top: 5px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .source-card {
+      padding: 12px;
+      margin-top: 10px;
+    }
+
+    .subscreen .content {
+      padding-bottom: 24px;
+    }
+
+    .head-title {
+      min-width: 0;
+      text-align: center;
+    }
+
+    .head-title b,
+    .head-title span {
+      display: block;
+    }
+
+    .head-title b {
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .head-title span {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .upload-zone {
+      min-height: 170px;
+      border: 1px dashed #93d9d1;
+      border-radius: var(--radius);
+      background: #f2fbf9;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 18px;
+      color: #284048;
+    }
+
+    .upload-zone .upload-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 10px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #dbf7f1;
+      color: var(--teal);
+    }
+
+    .upload-zone b,
+    .upload-zone span {
+      display: block;
+    }
+
+    .upload-zone b {
+      font-size: 16px;
+    }
+
+    .upload-zone span {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .search-box,
+    .result-card,
+    .correction-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 22px rgba(38, 55, 67, 0.05);
+    }
+
+    .search-box {
+      min-height: 46px;
+      padding: 0 12px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+    }
+
+    .search-box input {
+      border: 0;
+      outline: 0;
+      width: 100%;
+      color: var(--ink);
+      background: transparent;
+    }
+
+    .result-card {
+      padding: 13px;
+      margin-top: 10px;
+    }
+
+    .result-card p {
+      margin: 8px 0 0;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #33454d;
+    }
+
+    .result-card mark {
+      color: var(--teal);
+      background: var(--teal-weak);
+      border-radius: 4px;
+      padding: 0 2px;
+    }
+
+    .generation-card {
+      min-height: 220px;
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: #fff;
+      box-shadow: 0 10px 28px rgba(30,44,55,0.08);
+      display: grid;
+      justify-items: center;
+      align-content: center;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .generation-ring {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--teal);
+      background:
+        radial-gradient(circle, #fff 58%, transparent 59%),
+        conic-gradient(var(--teal) 0 76%, #dce9e8 76% 100%);
+    }
+
+    .option-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .option-row {
+      min-height: 62px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      text-align: left;
+      width: 100%;
+    }
+
+    .option-row.active {
+      border-color: rgba(14,159,143,0.34);
+      background: #f5fcfa;
+    }
+
+    .option-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--teal-weak);
+      color: var(--teal);
+      display: grid;
+      place-items: center;
+    }
+
+    .option-row .card-subtitle {
+      margin-top: 3px;
+    }
+
+    .record-menu {
+      display: grid;
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .menu-row {
+      min-height: 48px;
+      padding: 0 8px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      color: #26333c;
+      border-radius: 8px;
+      background: #f7faf9;
+      font-weight: 850;
+      text-align: left;
+    }
+
+    .correction-card {
+      padding: 13px;
+      margin-top: 12px;
+    }
+
+    .correction-card textarea {
+      width: 100%;
+      margin-top: 10px;
+      min-height: 92px;
+      resize: none;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px;
+      background: #f8fbfb;
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    .chat-area {
+      display: grid;
+      gap: 12px;
+      padding-top: 12px;
+    }
+
+    .chat-bubble {
+      padding: 12px;
+      max-width: 92%;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .chat-bubble.user {
+      margin-left: auto;
+      background: #123337;
+      color: #fff;
+      border-color: #123337;
+    }
+
+    .chat-bubble.ai {
+      margin-right: auto;
+    }
+
+    .ask-bar {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 84px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      box-shadow: 0 10px 28px rgba(30, 44, 55, 0.12);
+      z-index: 6;
+    }
+
+    .ask-bar input {
+      border: 0;
+      min-width: 0;
+      outline: 0;
+      color: #1f2d35;
+      padding: 0 8px;
+    }
+
+    .ask-bar button {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--teal);
+      color: #fff;
+      display: grid;
+      place-items: center;
+    }
+
+    .setting-card {
+      padding: 13px;
+      display: grid;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .setting-row div {
+      min-width: 0;
+    }
+
+    .setting-row b {
+      display: block;
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .setting-row span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      margin-top: 3px;
+    }
+
+    .switch {
+      width: 48px;
+      height: 28px;
+      border-radius: 999px;
+      padding: 3px;
+      background: #d5dde2;
+      transition: 0.2s;
+      flex: 0 0 auto;
+    }
+
+    .switch::before {
+      content: "";
+      display: block;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fff;
+      transition: 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+
+    .switch.on {
+      background: var(--teal);
+    }
+
+    .switch.on::before {
+      transform: translateX(20px);
+    }
+
+    .modal-layer,
+    .sheet-layer {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 20;
+      background: rgba(9, 17, 22, 0.38);
+      padding: 14px;
+    }
+
+    .modal-layer.active,
+    .sheet-layer.active {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 22px 50px rgba(0,0,0,0.24);
+    }
+
+    .modal h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .modal p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .modal-actions {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      height: 42px;
+      border-radius: 8px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn.ghost {
+      background: #f1f4f6;
+      color: #35444d;
+    }
+
+    .btn.solid {
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: #43515a;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px 12px;
+      color: var(--ink);
+      background: #f8fbfb;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .field textarea {
+      min-height: 70px;
+      resize: none;
+      line-height: 1.5;
+    }
+
+    .share-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .share-option {
+      min-height: 76px;
+      border-radius: 12px;
+      background: #f6f8f8;
+      display: grid;
+      place-items: center;
+      gap: 6px;
+      color: #35444d;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .share-option i {
+      width: 22px;
+      height: 22px;
+      color: var(--teal);
+    }
+
+    .source-sheet {
+      width: 100%;
+      max-height: 72%;
+      background: #fff;
+      border-radius: 14px 14px 28px 28px;
+      padding: 16px;
+      overflow-y: auto;
+      box-shadow: 0 -12px 38px rgba(0,0,0,0.20);
+    }
+
+    .sheet-handle {
+      width: 42px;
+      height: 5px;
+      border-radius: 999px;
+      background: #d8e0e5;
+      margin: 0 auto 14px;
+    }
+
+    .audio-bar {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: #f2f6f7;
+      border-radius: var(--radius);
+      padding: 10px;
+      margin: 12px 0;
+    }
+
+    .play {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: #123337;
+      color: #fff;
+      display: grid;
+      place-items: center;
+    }
+
+    .track {
+      height: 6px;
+      border-radius: 999px;
+      background: #d9e1e6;
+      overflow: hidden;
+    }
+
+    .track span {
+      display: block;
+      height: 100%;
+      width: 42%;
+      background: var(--teal);
+      border-radius: inherit;
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 88px;
+      transform: translateX(-50%) translateY(16px);
+      background: rgba(20, 29, 35, 0.92);
+      color: #fff;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.25s;
+      z-index: 30;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .screen-list {
+      display: grid;
+      gap: 9px;
+      margin-bottom: 18px;
+    }
+
+    .screen-link {
+      min-height: 50px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      border-radius: var(--radius);
+      padding: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      text-align: left;
+      color: var(--ink);
+    }
+
+    .screen-link.active {
+      border-color: rgba(14, 159, 143, 0.45);
+      background: #eef9f7;
+    }
+
+    .screen-link strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .screen-link span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .mini-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #f2f6f7;
+      display: grid;
+      place-items: center;
+      color: var(--teal);
+    }
+
+    .notes {
+      display: grid;
+      gap: 10px;
+      color: #44525a;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .note {
+      padding: 10px 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    @media (max-width: 1120px) {
+      .page {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+
+      .design-brief,
+      .inspector {
+        width: min(100%, 560px);
+      }
+
+      .phone-stage {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 460px) {
+      .page {
+        padding: 0;
+        gap: 0;
+      }
+
+      .design-brief,
+      .inspector {
+        display: none;
+      }
+
+      .phone {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        padding: 0;
+      }
+
+      .phone::before { display: none; }
+      .app { border-radius: 0; }
+    }
+
+    /* Android app runtime: strip the prototype review canvas and device frame. */
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #f8fafb !important;
+    }
+
+    .page {
+      min-height: 100dvh !important;
+      display: block !important;
+      padding: 0 !important;
+      gap: 0 !important;
+      background: #f8fafb !important;
+    }
+
+    .design-brief,
+    .inspector {
+      display: none !important;
+    }
+
+    .phone-stage {
+      width: 100vw !important;
+      height: 100dvh !important;
+      display: block !important;
+    }
+
+    .phone {
+      width: 100vw !important;
+      height: 100dvh !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      background: #f8fafb !important;
+    }
+
+    .phone::before,
+    .statusbar {
+      display: none !important;
+    }
+
+    .app {
+      width: 100vw !important;
+      height: 100dvh !important;
+      border-radius: 0 !important;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <aside class="design-brief">
+      <section class="brief-card">
+        <div class="eyebrow"><i data-lucide="sparkles"></i> 鲲穹智能会议 APP V1.2</div>
+        <h1>会议从记录进入行动闭环</h1>
+        <p>高保真交互原型覆盖 APP 首发核心链路：实时录音、AI 纪要、来源核验、待办追踪、知识库问答、数据与隐私管理。</p>
+        <div class="brief-metrics">
+          <div class="metric"><strong>3 分钟</strong><span>生成会议纪要</span></div>
+          <div class="metric"><strong>100%</strong><span>P0 来源可核验</span></div>
+          <div class="metric"><strong>6 条</strong><span>周完成行动项</span></div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="phone-stage" aria-label="鲲穹智能会议 APP 高保真原型">
+      <div class="phone">
+        <div class="app">
+          <div class="statusbar">
+            <span>9:41</span>
+            <span class="status-icons">
+              <i data-lucide="signal"></i>
+              <i data-lucide="wifi"></i>
+              <i data-lucide="battery-full"></i>
+            </span>
+          </div>
+
+          <section id="screen-home" class="screen active">
+            <header class="topbar">
+              <div class="brand">
+                <div class="logo">晓</div>
+                <div class="brand-title">
+                  <b>鲲穹智能会议</b>
+                  <span>今天 3 场会议待处理</span>
+                </div>
+              </div>
+              <button class="icon-btn" title="搜索" onclick="go('search')"><i data-lucide="search"></i></button>
+            </header>
+            <div class="content">
+              <div class="hero-actions">
+                <button class="primary-action" onclick="openConsent()" title="开始记录">
+                  <span class="home-record-copy">
+                    <span class="action-icon"><i data-lucide="mic"></i></span>
+                    <span class="action-copy"><strong>开始记录</strong><span>实时转写，结束后生成纪要</span></span>
+                  </span>
+                  <span class="record-visual" aria-hidden="true">
+                    <span class="mini-wave"><span></span><span></span><span></span><span></span><span></span><span></span></span>
+                    <span class="ai-chip">AI 纪要生成</span>
+                  </span>
+                </button>
+                <button class="secondary-action" onclick="go('import')" title="导入文件">
+                  <span class="action-icon"><i data-lucide="upload"></i></span>
+                  <span class="action-copy"><strong>导入文件</strong><span>音频、视频转写</span></span>
+                </button>
+                <button class="secondary-action" onclick="openCreateMeeting()" title="预约会议">
+                  <span class="action-icon"><i data-lucide="calendar-plus"></i></span>
+                  <span class="action-copy"><strong>预约会议</strong><span>创建日程，提前开启提醒</span></span>
+                </button>
+              </div>
+
+              <div class="section-head">
+                <h2>今日会议</h2>
+                <button onclick="openCreateMeeting()">新建</button>
+              </div>
+              <div class="calendar-card">
+                <div class="time-pill">10:30</div>
+                <div>
+                  <div class="card-title">鲲穹智能会议 V1.2 需求评审</div>
+                  <div class="card-subtitle">产品、设计、研发，45 分钟</div>
+                </div>
+                <button class="mini-btn" onclick="openConsent()">记录</button>
+              </div>
+              <button class="create-meeting-card" onclick="openCreateMeeting()">
+                <span class="mini-icon"><i data-lucide="plus"></i></span>
+                <span><b>预约会议</b><span>填写主题、时间、参会人，保存在 App 内</span></span>
+                <i data-lucide="chevron-right"></i>
+              </button>
+
+              <div class="section-head">
+                <h2>最近会议</h2>
+                <button onclick="go('detail')">全部</button>
+              </div>
+              <div id="backgroundGeneratingCard" class="background-generate-card">
+                <div class="background-generate-head">
+                  <div>
+                    <b>AI 纪要后台生成中</b>
+                    <span>鲲穹智能会议 V1.2 需求评审 · 已退出录音页，可继续处理其他会议</span>
+                  </div>
+                  <span class="ai-chip">76%</span>
+                </div>
+                <div class="progress"><span style="width:76%"></span></div>
+                <div class="tag-row">
+                  <span class="tag teal">摘要生成中</span>
+                  <span class="tag indigo">来源核验</span>
+                  <span class="tag amber">待办提取</span>
+                </div>
+              </div>
+              <div class="meeting-list">
+                <div class="swipe-item">
+                  <button class="swipe-action" onclick="deleteMeeting(this)"><i data-lucide="trash-2"></i>删除</button>
+                  <button class="meeting-card" onclick="go('detail')">
+                    <div class="meeting-top">
+                      <div>
+                        <div class="card-title">客户拜访：华东制造业方案沟通</div>
+                        <div class="card-subtitle">昨天 16:20，42 分钟</div>
+                      </div>
+                      <span class="tag teal">已生成</span>
+                    </div>
+                    <div class="tag-row">
+                      <span class="tag indigo">客户需求</span>
+                      <span class="tag coral">3 个待办</span>
+                      <span class="tag">来源可核验</span>
+                    </div>
+                    <div class="progress"><span style="width: 76%"></span></div>
+                  </button>
+                </div>
+                <div class="swipe-item">
+                  <button class="swipe-action" onclick="deleteMeeting(this)"><i data-lucide="trash-2"></i>删除</button>
+                  <button class="meeting-card" onclick="go('detail')">
+                    <div class="meeting-top">
+                      <div>
+                        <div class="card-title">项目周会：移动端录音稳定性</div>
+                        <div class="card-subtitle">周一 09:00，58 分钟</div>
+                      </div>
+                      <span class="tag amber">待确认</span>
+                    </div>
+                    <div class="tag-row">
+                      <span class="tag teal">7 条纪要</span>
+                      <span class="tag coral">2 个风险</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="screen-import" class="screen subscreen">
+            <header class="topbar">
+              <button class="icon-btn" onclick="go('home')" title="返回"><i data-lucide="chevron-left"></i></button>
+              <div class="head-title">
+                <b>导入文件</b>
+                <span>音频、视频转写后生成同类纪要</span>
+              </div>
+              <button class="icon-btn" onclick="showToast('支持 mp3、m4a、wav、mp4、mov')" title="帮助"><i data-lucide="help-circle"></i></button>
+            </header>
+            <div class="content">
+              <button class="upload-zone" onclick="queueImport()">
+                <span>
+                  <span class="upload-icon"><i data-lucide="upload"></i></span>
+                  <b>上传会议文件</b>
+                  <span>最长 3 小时，导入后自动生成转写、摘要、决策、待办和来源时间点</span>
+                </span>
+              </button>
+              <article class="summary-card">
+                <h3><i data-lucide="sparkles"></i> 导入设置</h3>
+                <div class="option-list">
+                  <button class="option-row active" onclick="selectOption(this, '已选择中文普通话')">
+                    <span class="option-icon"><i data-lucide="languages"></i></span>
+                    <span><span class="card-title">中文普通话</span><span class="card-subtitle">适合评审、访谈、周会</span></span>
+                    <span class="tag teal">当前</span>
+                  </button>
+                  <button class="option-row" onclick="selectOption(this, '已使用需求评审模板')">
+                    <span class="option-icon"><i data-lucide="file-text"></i></span>
+                    <span><span class="card-title">需求评审模板</span><span class="card-subtitle">输出议题、决策、待办和风险</span></span>
+                    <span class="tag">模板</span>
+                  </button>
+                </div>
+              </article>
+              <article id="importQueue" class="summary-card" style="display:none">
+                <h3><i data-lucide="audio-lines"></i> 上传队列</h3>
+                <div class="meeting-top">
+                  <div>
+                    <div class="card-title">需求评审录音.m4a</div>
+                    <div class="card-subtitle">86.4 MB · 正在解析人声片段</div>
+                  </div>
+                  <span class="tag teal">42%</span>
+                </div>
+                <div class="progress" style="margin-top:12px"><span style="width:42%"></span></div>
+              </article>
+            </div>
+          </section>
+
+          <section id="screen-search" class="screen subscreen">
+            <header class="topbar">
+              <button class="icon-btn" onclick="go('home')" title="返回"><i data-lucide="chevron-left"></i></button>
+              <div class="head-title">
+                <b>搜索</b>
+                <span>会议、待办、转写原文一起找</span>
+              </div>
+              <button class="icon-btn" onclick="clearSearch()" title="清空"><i data-lucide="x"></i></button>
+            </header>
+            <div class="content">
+              <label class="search-box">
+                <i data-lucide="search"></i>
+                <input id="searchInput" value="后台录音" oninput="filterSearch()" aria-label="搜索会议内容" />
+                <i data-lucide="sparkles"></i>
+              </label>
+              <div id="searchResults">
+                <button class="result-card" onclick="go('detail')" style="width:100%;text-align:left">
+                  <div class="card-title">项目周会：移动端录音稳定性</div>
+                  <div class="card-subtitle">命中会议标题与风险结论</div>
+                  <p>风险集中在 <mark>后台录音</mark>、锁屏和切后台场景。</p>
+                </button>
+                <button class="result-card" onclick="go('tasks')" style="width:100%;text-align:left">
+                  <div class="card-title">待办：研发完成后台录音能力验证</div>
+                  <div class="card-subtitle">负责人 周晨 · 周五前</div>
+                  <div class="tag-row" style="margin-top:10px"><span class="tag coral">待办</span><span class="tag">来源 18:28</span></div>
+                </button>
+                <button class="result-card" onclick="openSource()" style="width:100%;text-align:left">
+                  <div class="card-title">转写原文 18:28</div>
+                  <p>如果锁屏和切后台都要继续录音，我们需要先做能力验证。</p>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section id="screen-record" class="screen record-screen">
+            <header class="topbar">
+              <button class="icon-btn" onclick="go('home')" title="返回"><i data-lucide="chevron-left"></i></button>
+              <div class="brand-title" style="text-align:center">
+                <b>鲲穹智能会议 V1.2 需求评审</b>
+                <span>后台录音保护已开启</span>
+              </div>
+              <button class="icon-btn" title="更多" onclick="openRecordMenu()"><i data-lucide="more-horizontal"></i></button>
+            </header>
+            <div class="record-content">
+              <div class="record-meter" id="recordMeter">
+                <div class="recording-row">
+                  <span class="live-dot" id="recordStateText">实时记录中</span>
+                  <span class="tag teal">中文普通话</span>
+                </div>
+                <div class="timer" id="timer">00:18:42</div>
+                <div class="wave" aria-hidden="true">
+                  <span style="--h:20px;--d:0s"></span><span style="--h:30px;--d:.1s"></span><span style="--h:42px;--d:.2s"></span><span style="--h:18px;--d:.3s"></span><span style="--h:35px;--d:.4s"></span><span style="--h:26px;--d:.5s"></span><span style="--h:44px;--d:.6s"></span><span style="--h:20px;--d:.7s"></span><span style="--h:32px;--d:.8s"></span><span style="--h:39px;--d:.9s"></span><span style="--h:16px;--d:1s"></span><span style="--h:31px;--d:1.1s"></span><span style="--h:45px;--d:1.2s"></span><span style="--h:22px;--d:1.3s"></span><span style="--h:34px;--d:1.4s"></span><span style="--h:40px;--d:1.5s"></span><span style="--h:18px;--d:.2s"></span><span style="--h:36px;--d:.35s"></span><span style="--h:24px;--d:.48s"></span><span style="--h:46px;--d:.61s"></span><span style="--h:20px;--d:.74s"></span><span style="--h:30px;--d:.87s"></span><span style="--h:43px;--d:1s"></span><span style="--h:17px;--d:1.13s"></span><span style="--h:34px;--d:1.26s"></span><span style="--h:25px;--d:1.39s"></span><span style="--h:42px;--d:1.52s"></span><span style="--h:18px;--d:.13s"></span><span style="--h:31px;--d:.26s"></span><span style="--h:37px;--d:.39s"></span><span style="--h:20px;--d:.52s"></span><span style="--h:45px;--d:.65s"></span><span style="--h:29px;--d:.78s"></span><span style="--h:38px;--d:.91s"></span><span style="--h:22px;--d:1.04s"></span><span style="--h:32px;--d:1.17s"></span>
+                </div>
+                <div id="pauseBanner" class="record-state-banner"><i data-lucide="pause-circle"></i><span>点击继续后恢复录音与实时转写，当前已保留暂停前片段。</span></div>
+              </div>
+
+              <div class="section-head" style="color:#fff;margin-top:8px">
+                <h2>实时转写</h2>
+              </div>
+              <div class="transcript">
+                <article class="line">
+                  <div class="speaker"><span>说话人1</span><span>18:12</span></div>
+                  <p>本轮评审重点是把 APP 首发范围压实，尤其是后台录音、来源核验和 AI 质量验收。</p>
+                </article>
+                <article class="line">
+                  <div class="speaker"><span>说话人2</span><span>18:28</span></div>
+                  <p>如果锁屏和切后台都要继续录音，我们需要先做 iOS 和 Android 的能力验证。</p>
+                </article>
+                <article class="line" id="focusTranscriptLine">
+                  <div class="speaker"><span>说话人3</span><span>18:39</span></div>
+                  <p>会议详情页建议把 AI 纪要放在上方，来源核验使用底部弹层，符合移动端阅读习惯。</p>
+                </article>
+              </div>
+
+              <div class="record-actions">
+                <button id="pauseAction" onclick="toggleRecordPause()"><i data-lucide="pause"></i>暂停</button>
+                <button class="danger" onclick="finishRecord()"><i data-lucide="square"></i>结束</button>
+              </div>
+            </div>
+          </section>
+
+          <section id="screen-generating" class="screen subscreen">
+            <header class="topbar">
+              <button class="icon-btn" onclick="minimizeGeneration()" title="关闭并后台生成"><i data-lucide="x"></i></button>
+              <div class="head-title">
+                <b>生成会议纪要</b>
+                <span>正在整理转写、决策和待办</span>
+              </div>
+              <button class="icon-btn" onclick="minimizeGeneration()" title="最小化"><i data-lucide="minimize-2"></i></button>
+            </header>
+            <div class="content">
+              <div class="generation-card">
+                <div class="generation-ring">76%</div>
+                <div class="card-title">AI 纪要生成中</div>
+                <div class="card-subtitle">已完成转写整理，正在提取决策、待办和风险</div>
+                <div class="tag-row" style="justify-content:center">
+                  <span class="tag teal">摘要</span>
+                  <span class="tag indigo">来源</span>
+                  <span class="tag amber">待办</span>
+                </div>
+              </div>
+              <article class="summary-card">
+                <h3><i data-lucide="clock"></i> 预计还需 40 秒</h3>
+                <p>可以留在当前页面等待，也可以退出到会议首页，AI 会在后台继续生成并提醒你进入详情。</p>
+                <div class="modal-actions">
+                  <button class="btn ghost" onclick="minimizeGeneration()">后台生成</button>
+                  <button class="btn solid" onclick="completeGeneration()">查看详情</button>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section id="screen-detail" class="screen">
+            <header class="topbar">
+              <button class="icon-btn" onclick="go('home')" title="返回"><i data-lucide="chevron-left"></i></button>
+              <button class="icon-btn" onclick="openShareSheet()" title="分享"><i data-lucide="share-2"></i></button>
+            </header>
+            <div class="detail-header">
+              <h2 class="detail-title">鲲穹智能会议 V1.2 需求评审</h2>
+              <div class="meta-row">
+                <span class="tag teal">AI 纪要已生成</span>
+                <span class="tag">58 分钟</span>
+                <span class="tag indigo">5 人</span>
+              </div>
+            </div>
+            <div class="segmented" role="tablist" aria-label="会议详情分析维度">
+              <button class="active" role="tab" aria-selected="true" onclick="switchDetailTab('summary', this)">摘要</button>
+              <button role="tab" aria-selected="false" onclick="switchDetailTab('topics', this)">议题</button>
+              <button role="tab" aria-selected="false" onclick="switchDetailTab('decisions', this)">决策</button>
+              <button role="tab" aria-selected="false" onclick="switchDetailTab('todos', this)">待办</button>
+              <button role="tab" aria-selected="false" onclick="switchDetailTab('risks', this)">风险</button>
+            </div>
+            <div class="content">
+              <div class="detail-panel active" id="detail-summary">
+                <article class="summary-card">
+                  <h3><i data-lucide="calendar-clock"></i> 会议详情</h3>
+                  <p>鲲穹智能会议自动汇总会议基础信息、参会人、输出物状态和数据处理进度，方便用户从会议记录进入行动闭环。</p>
+                  <div class="detail-info-grid">
+                    <div class="info-cell"><span>会议时间</span><b>2026/05/20 10:30-11:28</b></div>
+                    <div class="info-cell"><span>会议地点</span><b>线上腾讯会议</b></div>
+                    <div class="info-cell"><span>参会人</span><b>李楠、周晨、王澈等 5 人</b></div>
+                    <div class="info-cell"><span>产出物</span><b>纪要、决策、待办、风险</b></div>
+                  </div>
+                  <div class="data-loop">
+                    <button class="loop-step" onclick="openFlywheel('采集')"><i data-lucide="mic"></i><span>采集</span></button>
+                    <button class="loop-step" onclick="openFlywheel('生成')"><i data-lucide="file-text"></i><span>生成</span></button>
+                    <button class="loop-step" onclick="openFlywheel('确认')"><i data-lucide="check-circle-2"></i><span>确认</span></button>
+                    <button class="loop-step" onclick="openFlywheel('沉淀')"><i data-lucide="refresh-cw"></i><span>沉淀</span></button>
+                  </div>
+                </article>
+
+                <article class="summary-card">
+                  <button class="edit-pencil" onclick="openMinutesEditor('summary')" title="编辑摘要"><i data-lucide="pencil"></i></button>
+                  <h3><i data-lucide="sparkles"></i> 会议摘要</h3>
+                  <p id="editableSummary">本次评审确认鲲穹智能会议首发聚焦 iOS/Android APP，删除组织后台能力，重点补齐移动端录音生命周期、AI 质量验收、来源核验和隐私合规交互。</p>
+                  <div class="detail-overview">
+                    <div class="overview-pill"><strong>4</strong><span>议题</span></div>
+                    <div class="overview-pill"><strong>3</strong><span>决策</span></div>
+                    <div class="overview-pill"><strong>4</strong><span>待办</span></div>
+                    <div class="overview-pill"><strong>2</strong><span>风险</span></div>
+                  </div>
+                  <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>查看来源 18:12</button>
+                </article>
+
+                <article class="summary-card">
+                  <button class="edit-pencil" onclick="openMinutesEditor('decision')" title="编辑决策"><i data-lucide="pencil"></i></button>
+                  <h3><i data-lucide="badge-check"></i> 已确认决策</h3>
+                  <p id="editableDecision">V1.2 实施节奏调整为 18 周，增加 0-2 周技术预研，先验证后台录音和双端首发策略。</p>
+                  <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>查看来源 18:28</button>
+                </article>
+
+                <article class="summary-card">
+                  <h3><i data-lucide="list-checks"></i> 待办事项</h3>
+                  <div class="action-item">
+                    <button class="check" onclick="toggleDone(this)" title="完成待办"><i data-lucide="check"></i></button>
+                    <div>
+                      <div class="action-main">研发完成后台录音能力验证</div>
+                      <div class="action-meta">
+                        <span class="tag coral">周晨</span>
+                        <span class="tag amber">周五前</span>
+                        <span class="tag">来源 18:28</span>
+                      </div>
+                    </div>
+                    <button class="icon-btn" onclick="openSource()" title="查看来源"><i data-lucide="link"></i></button>
+                  </div>
+                </article>
+
+                <article class="summary-card">
+                  <h3><i data-lucide="captions"></i> 转写原文</h3>
+                  <p>说话人可点击改名，原文也支持二次修正。修正后来源片段和 AI 纪要可重新核验。</p>
+                  <div class="speaker-list">
+                    <div class="speaker-line">
+                      <button class="speaker-name" data-speaker="speaker1" onclick="openSpeakerEditor('speaker1')">说话人1</button>
+                      <div class="speaker-copy">
+                        <div class="speaker-meta"><span>18:12</span><span>高置信度</span></div>
+                        <p>本轮评审重点是把 APP 首发范围压实，尤其是后台录音、来源核验和 AI 质量验收。</p>
+                      </div>
+                    </div>
+                    <div class="speaker-line">
+                      <button class="speaker-name" data-speaker="speaker2" onclick="openSpeakerEditor('speaker2')">说话人2</button>
+                      <div class="speaker-copy">
+                        <div class="speaker-meta"><span>18:28</span><span>已生成决策</span></div>
+                        <p id="transcriptCorrectionTarget">如果锁屏和切后台都要继续路音，我们需要先做 iOS 和 Android 的能力验证。</p>
+                        <button class="evidence-btn" onclick="openCorrection()"><i data-lucide="pencil-line"></i>修正错别字</button>
+                      </div>
+                    </div>
+                    <div class="speaker-line">
+                      <button class="speaker-name" data-speaker="speaker3" onclick="openSpeakerEditor('speaker3')">说话人3</button>
+                      <div class="speaker-copy">
+                        <div class="speaker-meta"><span>31:06</span><span>待办来源</span></div>
+                        <p>AI 纪要要有明确验收标准，不能只看摘要像不像，还要验证决策、待办和来源引用。</p>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              <div class="detail-panel" id="detail-topics">
+                <article class="summary-card">
+                  <h3><i data-lucide="messages-square"></i> 议题梳理</h3>
+                  <p>AI 已按讨论顺序提取 4 个核心议题，可点击来源回放对应原文，便于复盘会议推进脉络。</p>
+                  <div class="insight-list">
+                    <div class="insight-item">
+                      <div class="insight-head">
+                        <h4 class="insight-title">1. APP 首发边界与组织后台取舍</h4>
+                        <span class="tag teal">已收敛</span>
+                      </div>
+                      <p class="insight-desc">团队确认 V1.2 只做 iOS/Android APP 端，组织管理后台延后到企业版阶段，当前版本优先保证个人用户会议记录体验。</p>
+                      <div class="inline-actions">
+                        <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>来源 18:12</button>
+                      </div>
+                    </div>
+                    <div class="insight-item">
+                      <div class="insight-head">
+                        <h4 class="insight-title">2. 移动端录音生命周期</h4>
+                        <span class="tag amber">需验证</span>
+                      </div>
+                      <p class="insight-desc">重点讨论锁屏、切后台、来电中断和系统杀进程场景，决定先安排 0-2 周技术预研。</p>
+                      <div class="inline-actions">
+                        <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>来源 18:28</button>
+                        <button class="ghost-action" onclick="showToast('已生成验证待办')"><i data-lucide="plus"></i>生成待办</button>
+                      </div>
+                    </div>
+                    <div class="insight-item">
+                      <div class="insight-head">
+                        <h4 class="insight-title">3. AI 纪要质量验收标准</h4>
+                        <span class="tag indigo">待补充</span>
+                      </div>
+                      <p class="insight-desc">会议要求明确转写准确率、决策提取、待办识别、来源引用四类验收指标，避免只做演示型纪要。</p>
+                      <div class="inline-actions">
+                        <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>来源 31:06</button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              <div class="detail-panel" id="detail-decisions">
+                <article class="summary-card">
+                  <h3><i data-lucide="badge-check"></i> 决策确认</h3>
+                  <p>本次会议共识别 3 条明确决策，均已绑定来源片段，支持二次确认和分享给参会人。</p>
+                  <div class="insight-list">
+                    <div class="insight-item">
+                      <div class="insight-head">
+                        <h4 class="insight-title">首发范围限定为 APP 端</h4>
+                        <span class="tag teal">已确认</span>
+                      </div>
+                      <p class="insight-desc">安卓/iOS 同步规划，Web、企业后台、开放 API 不进入 V1.2 首发范围。</p>
+                      <div class="inline-actions">
+                        <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>来源 18:12</button>
+                        <button class="ghost-action" onclick="showToast('决策已复制')"><i data-lucide="copy"></i>复制</button>
+                      </div>
+                    </div>
+                    <div class="insight-item">
+                      <div class="insight-head">
+                        <h4 class="insight-title">研发周期调整为 18 周</h4>
+                        <span class="tag teal">已确认</span>
+                      </div>
+                      <p class="insight-desc">增加 0-2 周技术预研，先完成后台录音、权限链路、双端兼容性风险验证。</p>
+                      <div class="inline-actions">
+                        <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>来源 18:28</button>
+                      </div>
+                    </div>
+                    <div class="insight-item">
+                      <div class="insight-head">
+                        <h4 class="insight-title">来源核验作为 P0 能力</h4>
+                        <span class="tag amber">需同步研发</span>
+                      </div>
+                      <p class="insight-desc">所有摘要、决策、待办和风险结论必须能追溯到原文片段或音频时间点。</p>
+                      <div class="inline-actions">
+                        <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>来源 33:40</button>
+                        <button class="ghost-action" onclick="showToast('已发送给研发确认')"><i data-lucide="send"></i>同步确认</button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              <div class="detail-panel" id="detail-todos">
+                <article class="summary-card">
+                  <h3><i data-lucide="list-checks"></i> 待办事项</h3>
+                  <p>待办支持勾选完成、查看来源、同步提醒。负责人和截止时间来自会议原文与 AI 补全。</p>
+                  <div class="action-item">
+                    <button class="check" onclick="toggleDone(this)" title="完成待办"><i data-lucide="check"></i></button>
+                    <div>
+                      <div class="action-main">研发完成后台录音能力验证</div>
+                      <div class="action-meta">
+                        <span class="tag coral">周晨</span>
+                        <span class="tag amber">周五前</span>
+                        <span class="tag">来源 18:28</span>
+                      </div>
+                    </div>
+                    <button class="icon-btn" onclick="openSource()" title="查看来源"><i data-lucide="link"></i></button>
+                  </div>
+                  <div class="action-item">
+                    <button class="check" onclick="toggleDone(this)" title="完成待办"><i data-lucide="check"></i></button>
+                    <div>
+                      <div class="action-main">设计补齐来源核验底部弹层状态</div>
+                      <div class="action-meta">
+                        <span class="tag coral">王澈</span>
+                        <span class="tag amber">明天</span>
+                        <span class="tag">来源 33:40</span>
+                      </div>
+                    </div>
+                    <button class="icon-btn" onclick="openSource()" title="查看来源"><i data-lucide="link"></i></button>
+                  </div>
+                  <div class="action-item">
+                    <button class="check" onclick="toggleDone(this)" title="完成待办"><i data-lucide="check"></i></button>
+                    <div>
+                      <div class="action-main">产品补充 AI 质量验收指标</div>
+                      <div class="action-meta">
+                        <span class="tag coral">林予</span>
+                        <span class="tag amber">本周五</span>
+                        <span class="tag">来源 31:06</span>
+                      </div>
+                    </div>
+                    <button class="icon-btn" onclick="openSource()" title="查看来源"><i data-lucide="link"></i></button>
+                  </div>
+                </article>
+              </div>
+
+              <div class="detail-panel" id="detail-risks">
+                <article class="summary-card">
+                  <h3><i data-lucide="shield-alert"></i> 风险识别</h3>
+                  <p>AI 将会议中的不确定性整理为风险清单，按影响程度标级，并给出推荐处理动作。</p>
+                  <div class="insight-list">
+                    <div class="insight-item">
+                      <div class="insight-head">
+                        <h4 class="insight-title">后台录音在锁屏/切后台场景不稳定</h4>
+                        <span class="risk-level high">高风险</span>
+                      </div>
+                      <p class="insight-desc">若系统限制导致录音中断，将直接影响实时转写完整性和用户信任，需要优先做双端能力验证。</p>
+                      <div class="inline-actions">
+                        <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>来源 18:28</button>
+                        <button class="ghost-action" onclick="showToast('已创建风险跟进待办')"><i data-lucide="plus"></i>创建跟进</button>
+                      </div>
+                    </div>
+                    <div class="insight-item">
+                      <div class="insight-head">
+                        <h4 class="insight-title">AI 纪要存在误提取或漏提取</h4>
+                        <span class="risk-level medium">中风险</span>
+                      </div>
+                      <p class="insight-desc">决策、待办、风险都需要来源引用和人工确认入口，否则会议结论容易被错误传播。</p>
+                      <div class="inline-actions">
+                        <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>来源 31:06</button>
+                      </div>
+                    </div>
+                    <div class="insight-item">
+                      <div class="insight-head">
+                        <h4 class="insight-title">录音合规提示可能被用户忽略</h4>
+                        <span class="risk-level low">低风险</span>
+                      </div>
+                      <p class="insight-desc">开始录音前应保留明确授权提示，并在录音中持续展示状态，降低隐私争议。</p>
+                      <div class="inline-actions">
+                        <button class="ghost-action" onclick="showToast('已加入合规检查清单')"><i data-lucide="shield-check"></i>加入清单</button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section id="screen-tasks" class="screen">
+            <header class="topbar">
+              <div class="brand">
+                <div class="logo">办</div>
+                <div class="brand-title">
+                  <b>我的待办</b>
+                  <span>今天 2 项，逾期 1 项</span>
+                </div>
+              </div>
+              <button class="icon-btn" onclick="showToast('筛选负责人、项目和状态')" title="筛选"><i data-lucide="sliders-horizontal"></i></button>
+            </header>
+            <div class="content">
+              <div class="tag-row" style="margin-top:4px">
+                <button class="tag teal">我负责</button>
+                <button class="tag">今日到期</button>
+                <button class="tag">逾期</button>
+                <button class="tag">待确认</button>
+              </div>
+              <div class="section-head">
+                <h2>待处理</h2>
+                <button onclick="showToast('已同步最新状态')">刷新</button>
+              </div>
+              <div class="task-card action-item">
+                <button class="check" onclick="toggleDone(this)" title="完成待办"><i data-lucide="check"></i></button>
+                <div>
+                  <div class="action-main">确定 iOS 与 Android 是否同步首发</div>
+                  <div class="card-subtitle">来自 鲲穹智能会议 V1.2 需求评审</div>
+                  <div class="action-meta">
+                    <span class="tag coral">产品负责人</span>
+                    <span class="tag amber">今天 18:00</span>
+                  </div>
+                </div>
+                <button class="icon-btn" onclick="openSource()" title="来源"><i data-lucide="link"></i></button>
+              </div>
+              <div class="task-card action-item">
+                <button class="check" onclick="toggleDone(this)" title="完成待办"><i data-lucide="check"></i></button>
+                <div>
+                  <div class="action-main">输出移动端录音异常测试用例</div>
+                  <div class="card-subtitle">来自 移动端稳定性专项</div>
+                  <div class="action-meta">
+                    <span class="tag coral">QA</span>
+                    <span class="tag">周五</span>
+                  </div>
+                </div>
+                <button class="icon-btn" onclick="openSource()" title="来源"><i data-lucide="link"></i></button>
+              </div>
+              <div class="section-head">
+                <h2>已完成</h2>
+                <button onclick="showToast('显示最近 7 天')">最近</button>
+              </div>
+              <div class="task-card action-item done">
+                <button class="check" onclick="toggleDone(this)" title="恢复待办"><i data-lucide="check"></i></button>
+                <div>
+                  <div class="action-main">合并重复的日历提醒需求</div>
+                  <div class="card-subtitle">昨天完成</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="screen-knowledge" class="screen">
+            <header class="topbar">
+              <div class="brand">
+                <div class="logo">知</div>
+                <div class="brand-title">
+                  <b>知识库</b>
+                  <span>答案必须带来源</span>
+                </div>
+              </div>
+              <button class="icon-btn" onclick="showToast('筛选项目、客户和时间')" title="筛选"><i data-lucide="filter"></i></button>
+            </header>
+            <div class="content" style="padding-bottom:144px">
+              <div class="tag-row">
+                <span class="tag teal">最近 90 天</span>
+                <span class="tag indigo">鲲穹智能会议</span>
+                <span class="tag">需求评审</span>
+              </div>
+              <div class="chat-area" id="chatArea">
+                <div class="chat-bubble user">V1.2 还有哪些开放问题？</div>
+                <div class="chat-bubble ai">
+                  当前还有 3 个关键问题：是否双端同步首发、线上会议记录方式、ASR 与 LLM 供应商选择。
+                  <button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>来源：开放问题 09:41</button>
+                </div>
+                <div class="source-card">
+                  <div class="card-title">推荐问题</div>
+                  <div class="tag-row" style="margin-top:10px">
+                    <button class="tag" onclick="askPreset('本周我有哪些待办？')">本周我有哪些待办？</button>
+                    <button class="tag" onclick="askPreset('最近的项目风险是什么？')">最近的项目风险是什么？</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ask-bar">
+              <input id="askInput" value="后台录音有哪些风险？" aria-label="输入问题" />
+              <button onclick="askQuestion()" title="发送"><i data-lucide="send"></i></button>
+            </div>
+          </section>
+
+          <section id="screen-profile" class="screen">
+            <header class="topbar">
+              <div class="brand">
+                <div class="logo">我</div>
+                <div class="brand-title">
+                  <b>个人空间</b>
+                  <span>云端同步正常</span>
+                </div>
+              </div>
+              <button class="icon-btn" onclick="showToast('账号与安全')" title="账号安全"><i data-lucide="shield"></i></button>
+            </header>
+            <div class="content">
+              <article class="summary-card">
+                <h3><i data-lucide="cloud"></i> 存储与同步</h3>
+                <p>已同步 128 场会议，本地缓存 1.8GB。未上传音频 0 条。</p>
+                <div class="progress" style="margin-top:12px"><span style="width:48%"></span></div>
+              </article>
+
+              <div class="section-head">
+                <h2>数据与隐私</h2>
+                <button onclick="showToast('已打开隐私政策')">查看</button>
+              </div>
+              <div class="setting-card">
+                <div class="setting-row">
+                  <div><b>云端同步</b><span>关闭后会议仅保存在本机</span></div>
+                  <button class="switch on" onclick="toggleSwitch(this)" title="云端同步"></button>
+                </div>
+                <div class="setting-row">
+                  <div><b>私密会议默认关闭问答</b><span>私密内容不进入知识库问答</span></div>
+                  <button class="switch on" onclick="toggleSwitch(this)" title="私密会议"></button>
+                </div>
+                <div class="setting-row">
+                  <div><b>敏感内容分享提醒</b><span>分享前提示个人信息和商业信息</span></div>
+                  <button class="switch on" onclick="toggleSwitch(this)" title="敏感提醒"></button>
+                </div>
+              </div>
+
+              <div class="section-head">
+                <h2>系统权限</h2>
+                <button onclick="showToast('跳转系统设置')">管理</button>
+              </div>
+              <div class="setting-card">
+                <div class="setting-row">
+                  <div><b>麦克风</b><span>用于实时录音和转写</span></div>
+                  <span class="tag teal">已开启</span>
+                </div>
+                <div class="setting-row">
+                  <div><b>通知</b><span>用于录音状态和待办提醒</span></div>
+                  <span class="tag teal">已开启</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <nav class="bottom-nav" aria-label="底部导航">
+            <button class="tab active" data-target="home" onclick="go('home')"><i data-lucide="layout-list"></i><span>会议</span></button>
+            <button class="tab" data-target="tasks" onclick="go('tasks')"><i data-lucide="circle-check-big"></i><span>待办</span></button>
+            <button class="tab" data-target="knowledge" onclick="go('knowledge')"><i data-lucide="messages-square"></i><span>知识库</span></button>
+            <button class="tab" data-target="profile" onclick="go('profile')"><i data-lucide="user-round"></i><span>我的</span></button>
+          </nav>
+
+          <div id="createMeetingModal" class="modal-layer">
+            <section class="modal">
+              <h3>预约会议</h3>
+              <p>预约后会显示在今日会议列表，可提前提醒，也可以到点直接开始记录。</p>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="meetingTitleInput">会议主题</label>
+                  <input id="meetingTitleInput" value="产品评审：会议创建与删除交互" />
+                </div>
+                <div class="field">
+                  <label for="meetingTimeInput">会议时间</label>
+                  <input id="meetingTimeInput" value="今天 15:00-15:45" />
+                </div>
+                <div class="field">
+                  <label for="meetingPeopleInput">参会人</label>
+                  <input id="meetingPeopleInput" value="产品、设计、研发" />
+                </div>
+                <div class="field">
+                  <label for="meetingNoteInput">会议备注</label>
+                  <textarea id="meetingNoteInput">提前准备最近会议删除、分享和说话人识别方案。</textarea>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="btn ghost" onclick="closeCreateMeeting()">取消</button>
+                <button class="btn solid" onclick="createMeeting()"><i data-lucide="calendar-plus"></i>创建</button>
+              </div>
+            </section>
+          </div>
+
+          <div id="minutesModal" class="modal-layer">
+            <section class="modal">
+              <h3 id="minutesEditorTitle">编辑会议摘要</h3>
+              <p>修改后保留来源引用，便于分享前完成一次人工确认。</p>
+              <div class="field" style="margin-top:14px">
+                <label for="minutesEditorInput">内容</label>
+                <textarea id="minutesEditorInput"></textarea>
+              </div>
+              <div class="modal-actions">
+                <button class="btn ghost" onclick="closeMinutesEditor()">取消</button>
+                <button class="btn solid" onclick="saveMinutesEditor()"><i data-lucide="save"></i>保存修改</button>
+              </div>
+            </section>
+          </div>
+
+          <div id="correctionModal" class="modal-layer">
+            <section class="modal">
+              <h3>修正转写原文</h3>
+              <p>修正 ASR 错别字后，关联来源片段会按新原文重新核验。</p>
+              <div class="correction-card">
+                <div class="card-title">说话人2 · 18:28</div>
+                <textarea id="correctionInput">如果锁屏和切后台都要继续录音，我们需要先做 iOS 和 Android 的能力验证。</textarea>
+                <div class="tag-row">
+                  <span class="tag coral">原文：路音</span>
+                  <span class="tag teal">建议：录音</span>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="btn ghost" onclick="closeCorrection()">取消</button>
+                <button class="btn solid" onclick="saveCorrection()"><i data-lucide="check"></i>保存修正</button>
+              </div>
+            </section>
+          </div>
+
+          <div id="speakerModal" class="modal-layer">
+            <section class="modal">
+              <h3>修改说话人姓名</h3>
+              <p>用于把“说话人1/2/3”改成真实姓名，后续纪要、来源和待办会沿用该名称。</p>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="speakerNameInput">姓名</label>
+                  <input id="speakerNameInput" value="李楠" />
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="btn ghost" onclick="closeSpeakerEditor()">取消</button>
+                <button class="btn solid" onclick="saveSpeakerName()"><i data-lucide="user-check"></i>保存</button>
+              </div>
+            </section>
+          </div>
+
+          <div id="shareSheet" class="sheet-layer" onclick="shareBackdrop(event)">
+            <section class="source-sheet">
+              <div class="sheet-handle"></div>
+              <h3 style="margin:0 0 8px;font-size:18px">分享会议纪要</h3>
+              <p style="margin:0;color:var(--muted);font-size:13px;line-height:1.5">可分享摘要、完整纪要、待办清单或带来源链接的核验版本。</p>
+              <div class="share-grid">
+                <button class="share-option" onclick="shareTo('微信好友')"><i data-lucide="message-circle"></i><span>微信好友</span></button>
+                <button class="share-option" onclick="shareTo('朋友圈')"><i data-lucide="aperture"></i><span>朋友圈</span></button>
+                <button class="share-option" onclick="shareTo('企业微信')"><i data-lucide="briefcase-business"></i><span>企业微信</span></button>
+                <button class="share-option" onclick="shareTo('钉钉')"><i data-lucide="send"></i><span>钉钉</span></button>
+                <button class="share-option" onclick="shareTo('飞书')"><i data-lucide="messages-square"></i><span>飞书</span></button>
+                <button class="share-option" onclick="shareTo('PDF 导出')"><i data-lucide="file-down"></i><span>PDF</span></button>
+              </div>
+              <button class="btn ghost" style="width:100%;margin-top:12px" onclick="closeShareSheet()">取消</button>
+            </section>
+          </div>
+
+          <div id="flywheelSheet" class="sheet-layer" onclick="flywheelBackdrop(event)">
+            <section class="source-sheet">
+              <div class="sheet-handle"></div>
+              <h3 id="flywheelTitle" style="margin:0 0 8px;font-size:18px">确认阶段</h3>
+              <p id="flywheelCopy" style="margin:0;color:var(--muted);font-size:13px;line-height:1.6">用户检查 AI 输出后，系统才会把纪要、说话人和待办沉淀为可信知识。</p>
+              <div id="flywheelTags" class="tag-row" style="margin-top:12px"></div>
+              <button class="btn solid" style="width:100%;margin-top:14px" onclick="closeFlywheel()">知道了</button>
+            </section>
+          </div>
+
+          <div id="recordMenuSheet" class="sheet-layer" onclick="recordMenuBackdrop(event)">
+            <section class="source-sheet">
+              <div class="sheet-handle"></div>
+              <h3 style="margin:0;font-size:18px">录音更多</h3>
+              <p style="margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.5">切换当前会议的识别语言、说话人和合规设置。</p>
+              <div class="record-menu">
+                <button class="menu-row" onclick="openRecordTool('language')"><i data-lucide="languages"></i><span>切换语言</span><i data-lucide="chevron-right"></i></button>
+                <button class="menu-row" onclick="openRecordTool('speakers')"><i data-lucide="users"></i><span>管理说话人</span><i data-lucide="chevron-right"></i></button>
+                <button class="menu-row" onclick="openRecordTool('compliance')"><i data-lucide="shield-check"></i><span>录音合规提示</span><i data-lucide="chevron-right"></i></button>
+                <button class="menu-row" onclick="openRecordTool('settings')"><i data-lucide="settings"></i><span>录音设置</span><i data-lucide="chevron-right"></i></button>
+              </div>
+              <button class="btn ghost" style="width:100%;margin-top:12px" onclick="closeRecordMenu()">取消</button>
+            </section>
+          </div>
+
+          <div id="recordToolSheet" class="sheet-layer" onclick="recordToolBackdrop(event)">
+            <section class="source-sheet">
+              <div class="sheet-handle"></div>
+              <h3 id="recordToolTitle" style="margin:0;font-size:18px">切换语言</h3>
+              <p id="recordToolCopy" style="margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.5"></p>
+              <div id="recordToolOptions" class="option-list"></div>
+              <button class="btn solid" style="width:100%;margin-top:14px" onclick="closeRecordTool()">完成</button>
+            </section>
+          </div>
+
+          <div id="consentModal" class="modal-layer">
+            <section class="modal">
+              <h3>开始录音前确认</h3>
+              <p>请确认本次录音已获得会议参与方许可，并遵守当地法律法规。录音中会持续展示状态提醒。</p>
+              <div class="modal-actions">
+                <button class="btn ghost" onclick="closeConsent()">取消</button>
+                <button class="btn solid" onclick="acceptConsent()"><i data-lucide="mic"></i>开始记录</button>
+              </div>
+            </section>
+          </div>
+
+          <div id="sourceSheet" class="sheet-layer" onclick="sheetBackdrop(event)">
+            <section class="source-sheet">
+              <div class="sheet-handle"></div>
+              <h3 style="margin:0 0 8px;font-size:18px">来源核验</h3>
+              <p style="margin:0;color:var(--muted);font-size:13px;line-height:1.5">会议详情 · 18:28 · 周晨</p>
+              <div class="audio-bar">
+                <button class="play" onclick="showToast('播放来源音频')" title="播放"><i data-lucide="play"></i></button>
+                <div class="track"><span></span></div>
+                <span style="font-size:12px;color:var(--muted)">18:28</span>
+              </div>
+              <div class="source-card">
+                <div class="card-title">原文片段</div>
+                <p style="margin:8px 0 0;color:#33424a;line-height:1.65;font-size:14px">如果锁屏和切后台都要继续录音，我们需要先做 iOS 和 Android 的能力验证。这个风险要放进技术预研阶段。</p>
+              </div>
+              <button class="btn solid" style="width:100%;margin-top:12px" onclick="closeSource()">确认</button>
+            </section>
+          </div>
+
+          <div id="toast" class="toast">已完成</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="inspector">
+      <section class="panel">
+        <h2>画板导航</h2>
+        <div class="screen-list">
+          <button class="screen-link active" data-link="home" onclick="go('home')">
+            <span class="mini-icon"><i data-lucide="layout-list"></i></span>
+            <span><strong>会议首页</strong><span>开始记录、导入文件、今日会议</span></span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <button class="screen-link" data-link="record" onclick="openConsent()">
+            <span class="mini-icon"><i data-lucide="mic"></i></span>
+            <span><strong>实时录音</strong><span>后台保护、实时转写、结束生成</span></span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <button class="screen-link" data-link="detail" onclick="go('detail')">
+            <span class="mini-icon"><i data-lucide="file-text"></i></span>
+            <span><strong>会议详情</strong><span>AI 纪要、待办、来源核验</span></span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <button class="screen-link" data-link="tasks" onclick="go('tasks')">
+            <span class="mini-icon"><i data-lucide="circle-check-big"></i></span>
+            <span><strong>待办页</strong><span>确认、完成、追溯来源</span></span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <button class="screen-link" data-link="knowledge" onclick="go('knowledge')">
+            <span class="mini-icon"><i data-lucide="messages-square"></i></span>
+            <span><strong>知识库问答</strong><span>跨会议提问，答案带引用</span></span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <button class="screen-link" data-link="profile" onclick="go('profile')">
+            <span class="mini-icon"><i data-lucide="shield"></i></span>
+            <span><strong>我的设置</strong><span>权限、缓存、云端同步</span></span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+        </div>
+        <div class="notes">
+          <div class="note">主色使用可信赖的深墨绿和清爽青绿，辅以珊瑚色处理录音、风险和行动提醒。</div>
+          <div class="note">移动端页面采用单列信息结构，来源核验通过底部弹层承载，减少页面跳转。</div>
+          <div class="note">关键交互已做可点击状态：录音授权、结束录音、来源核验、待办完成、知识库提问和隐私开关。</div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <script>
+    const screens = ["home", "import", "search", "record", "generating", "detail", "tasks", "knowledge", "profile"];
+    let timerSeconds = 18 * 60 + 42;
+    let timerHandle = null;
+    let activeSpeakerId = null;
+    let activeMinutesKind = null;
+    let recordPaused = false;
+
+    function refreshIcons() {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function setActiveButton(name) {
+      document.querySelectorAll(".tab").forEach((el) => {
+        el.classList.toggle("active", el.dataset.target === name);
+      });
+      document.querySelectorAll(".screen-link").forEach((el) => {
+        el.classList.toggle("active", el.dataset.link === name);
+      });
+    }
+
+    function go(name) {
+      screens.forEach((screen) => {
+        const node = document.getElementById("screen-" + screen);
+        if (node) node.classList.toggle("active", screen === name);
+      });
+      document.querySelector(".bottom-nav").classList.toggle("hidden", ["record", "generating", "import", "search"].includes(name));
+      setActiveButton(name);
+      if (name === "record") startTimer();
+      if (name !== "record") stopTimer();
+      refreshIcons();
+    }
+
+    function queueImport() {
+      document.getElementById("importQueue").style.display = "block";
+      showToast("文件已加入转写队列");
+    }
+
+    function clearSearch() {
+      document.getElementById("searchInput").value = "";
+      filterSearch();
+    }
+
+    function filterSearch() {
+      const keyword = document.getElementById("searchInput").value.trim();
+      const results = document.getElementById("searchResults");
+      results.style.opacity = keyword ? "1" : "0.45";
+      showToast(keyword ? "正在搜索“" + keyword + "”" : "输入关键词搜索");
+    }
+
+    function selectOption(btn, toast) {
+      const list = btn.closest(".option-list");
+      if (list) {
+        list.querySelectorAll(".option-row").forEach((node) => node.classList.toggle("active", node === btn));
+      }
+      showToast(toast);
+    }
+
+    function switchDetailTab(name, btn) {
+      document.querySelectorAll("#screen-detail .segmented button").forEach((el) => {
+        const active = el === btn;
+        el.classList.toggle("active", active);
+        el.setAttribute("aria-selected", active ? "true" : "false");
+      });
+
+      document.querySelectorAll("#screen-detail .detail-panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.id === "detail-" + name);
+      });
+
+      const labels = {
+        summary: "摘要",
+        topics: "议题",
+        decisions: "决策",
+        todos: "待办",
+        risks: "风险"
+      };
+      showToast("已切换到" + labels[name]);
+      refreshIcons();
+    }
+
+    function openCreateMeeting() {
+      document.getElementById("createMeetingModal").classList.add("active");
+      refreshIcons();
+    }
+
+    function closeCreateMeeting() {
+      document.getElementById("createMeetingModal").classList.remove("active");
+    }
+
+    function createMeeting() {
+      const title = document.getElementById("meetingTitleInput").value.trim() || "未命名会议";
+      const time = document.getElementById("meetingTimeInput").value.trim() || "今天";
+      const people = document.getElementById("meetingPeopleInput").value.trim() || "待补充参会人";
+      const card = document.createElement("div");
+      card.className = "calendar-card";
+      card.innerHTML = `
+        <div class="time-pill">15:00</div>
+        <div>
+          <div class="card-title">${title}</div>
+          <div class="card-subtitle">${people}，${time}</div>
+        </div>
+        <button class="mini-btn" onclick="openConsent()">记录</button>
+      `;
+      const createEntry = document.querySelector(".create-meeting-card");
+      createEntry.parentNode.insertBefore(card, createEntry);
+      closeCreateMeeting();
+      showToast("会议已创建并同步提醒");
+      refreshIcons();
+    }
+
+    function deleteMeeting(btn) {
+      if (window.event) window.event.stopPropagation();
+      const item = btn.closest(".swipe-item");
+      item.style.height = item.offsetHeight + "px";
+      item.style.opacity = "0";
+      item.style.transform = "translateX(18px)";
+      window.setTimeout(() => item.remove(), 180);
+      showToast("会议已删除，可在回收站恢复");
+    }
+
+    function initSwipeDelete() {
+      document.querySelectorAll(".swipe-item").forEach((item) => {
+        let startX = 0;
+        let startY = 0;
+        item.addEventListener("pointerdown", (event) => {
+          startX = event.clientX;
+          startY = event.clientY;
+        });
+        item.addEventListener("pointerup", (event) => {
+          const dx = event.clientX - startX;
+          const dy = Math.abs(event.clientY - startY);
+          document.querySelectorAll(".swipe-item").forEach((node) => {
+            if (node !== item) node.classList.remove("revealed");
+          });
+          if (dx > 45 && dy < 28) {
+            item.classList.add("revealed");
+            showToast("点击红色区域删除会议");
+          } else if (dx < -20 || dy >= 28) {
+            item.classList.remove("revealed");
+          }
+        });
+      });
+    }
+
+    function openSpeakerEditor(id) {
+      activeSpeakerId = id;
+      const current = document.querySelector(`[data-speaker="${id}"]`)?.textContent.trim() || "";
+      document.getElementById("speakerNameInput").value = current;
+      document.getElementById("speakerModal").classList.add("active");
+    }
+
+    function closeSpeakerEditor() {
+      document.getElementById("speakerModal").classList.remove("active");
+    }
+
+    function saveSpeakerName() {
+      const value = document.getElementById("speakerNameInput").value.trim();
+      if (!value || !activeSpeakerId) {
+        showToast("请输入说话人姓名");
+        return;
+      }
+      document.querySelectorAll(`[data-speaker="${activeSpeakerId}"]`).forEach((node) => {
+        node.textContent = value;
+      });
+      closeSpeakerEditor();
+      showToast("说话人已更新");
+    }
+
+    function openShareSheet() {
+      document.getElementById("shareSheet").classList.add("active");
+      refreshIcons();
+    }
+
+    function closeShareSheet() {
+      document.getElementById("shareSheet").classList.remove("active");
+    }
+
+    function shareBackdrop(event) {
+      if (event.target.id === "shareSheet") closeShareSheet();
+    }
+
+    function shareTo(channel) {
+      closeShareSheet();
+      showToast("已生成" + channel + "分享内容");
+    }
+
+    function openConsent() {
+      document.getElementById("consentModal").classList.add("active");
+      refreshIcons();
+    }
+
+    function closeConsent() {
+      document.getElementById("consentModal").classList.remove("active");
+    }
+
+    function acceptConsent() {
+      closeConsent();
+      resetRecordState();
+      go("record");
+      showToast("录音已开始");
+    }
+
+    function finishRecord() {
+      stopTimer();
+      go("generating");
+      showToast("录音已结束，AI 正在生成纪要");
+    }
+
+    function minimizeGeneration() {
+      document.getElementById("backgroundGeneratingCard").classList.add("active");
+      go("home");
+      showToast("AI 已转入后台生成");
+    }
+
+    function completeGeneration() {
+      document.getElementById("backgroundGeneratingCard").classList.remove("active");
+      go("detail");
+      showToast("AI 纪要已生成，可继续编辑确认");
+    }
+
+    function startTimer() {
+      if (timerHandle || recordPaused) return;
+      timerHandle = setInterval(() => {
+        timerSeconds += 1;
+        const h = Math.floor(timerSeconds / 3600);
+        const m = Math.floor((timerSeconds % 3600) / 60);
+        const s = timerSeconds % 60;
+        const value = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        const timer = document.getElementById("timer");
+        if (timer) timer.textContent = value;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerHandle) {
+        clearInterval(timerHandle);
+        timerHandle = null;
+      }
+    }
+
+    function resetRecordState() {
+      recordPaused = false;
+      const meter = document.getElementById("recordMeter");
+      const state = document.getElementById("recordStateText");
+      const banner = document.getElementById("pauseBanner");
+      const action = document.getElementById("pauseAction");
+      const note = document.getElementById("focusNote");
+      const line = document.getElementById("focusTranscriptLine");
+      meter.classList.remove("paused");
+      banner.classList.remove("active");
+      note.classList.remove("active");
+      line.classList.remove("focused");
+      line.querySelector(".focus-flag")?.remove();
+      state.textContent = "实时记录中";
+      action.innerHTML = '<i data-lucide="pause"></i>暂停';
+      refreshIcons();
+    }
+
+    function toggleRecordPause() {
+      recordPaused = !recordPaused;
+      const meter = document.getElementById("recordMeter");
+      const state = document.getElementById("recordStateText");
+      const banner = document.getElementById("pauseBanner");
+      const action = document.getElementById("pauseAction");
+      meter.classList.toggle("paused", recordPaused);
+      banner.classList.toggle("active", recordPaused);
+      state.textContent = recordPaused ? "暂停中" : "实时记录中";
+      action.innerHTML = recordPaused ? '<i data-lucide="play"></i>继续' : '<i data-lucide="pause"></i>暂停';
+      if (recordPaused) stopTimer();
+      if (!recordPaused) startTimer();
+      showToast(recordPaused ? "录音已暂停" : "录音已继续");
+      refreshIcons();
+    }
+
+    function openSource() {
+      document.getElementById("sourceSheet").classList.add("active");
+      refreshIcons();
+    }
+
+    function closeSource() {
+      document.getElementById("sourceSheet").classList.remove("active");
+    }
+
+    function sheetBackdrop(event) {
+      if (event.target.id === "sourceSheet") closeSource();
+    }
+
+    function openMinutesEditor(kind) {
+      activeMinutesKind = kind;
+      const source = document.getElementById(kind === "decision" ? "editableDecision" : "editableSummary");
+      document.getElementById("minutesEditorTitle").textContent = kind === "decision" ? "编辑会议决策" : "编辑会议摘要";
+      document.getElementById("minutesEditorInput").value = source.textContent.trim();
+      document.getElementById("minutesModal").classList.add("active");
+      refreshIcons();
+    }
+
+    function closeMinutesEditor() {
+      document.getElementById("minutesModal").classList.remove("active");
+    }
+
+    function saveMinutesEditor() {
+      const value = document.getElementById("minutesEditorInput").value.trim();
+      if (!value || !activeMinutesKind) {
+        showToast("请输入修改后的内容");
+        return;
+      }
+      const target = document.getElementById(activeMinutesKind === "decision" ? "editableDecision" : "editableSummary");
+      target.textContent = value;
+      closeMinutesEditor();
+      showToast("纪要修改已保存");
+    }
+
+    function openCorrection() {
+      document.getElementById("correctionModal").classList.add("active");
+      refreshIcons();
+    }
+
+    function closeCorrection() {
+      document.getElementById("correctionModal").classList.remove("active");
+    }
+
+    function saveCorrection() {
+      const value = document.getElementById("correctionInput").value.trim();
+      if (!value) {
+        showToast("请输入修正后的原文");
+        return;
+      }
+      document.getElementById("transcriptCorrectionTarget").textContent = value;
+      closeCorrection();
+      showToast("转写已修正，来源等待重新核验");
+    }
+
+    const flywheelMap = {
+      "采集": {
+        copy: "录音、文件导入和参会信息进入当前会议，形成可追溯的原始数据。",
+        tags: ["实时录音", "文件导入", "参会信息"]
+      },
+      "生成": {
+        copy: "ASR 和 AI 将原始数据整理为转写、摘要、决策、待办、风险和来源。",
+        tags: ["转写原文", "AI 纪要", "来源引用"]
+      },
+      "确认": {
+        copy: "用户核对说话人、原文和关键结论，确认后再用于分享与协作。",
+        tags: ["人工修正", "待办确认", "来源核验"]
+      },
+      "沉淀": {
+        copy: "已确认内容进入知识库和待办闭环，后续问答优先引用可信会议结果。",
+        tags: ["知识库", "待办闭环", "跨会议问答"]
+      }
+    };
+
+    function openFlywheel(step) {
+      const data = flywheelMap[step];
+      document.getElementById("flywheelTitle").textContent = step + "阶段";
+      document.getElementById("flywheelCopy").textContent = data.copy;
+      document.getElementById("flywheelTags").innerHTML = data.tags.map((tag) => `<span class="tag teal">${tag}</span>`).join("");
+      document.getElementById("flywheelSheet").classList.add("active");
+      showToast("查看" + step + "说明");
+    }
+
+    function closeFlywheel() {
+      document.getElementById("flywheelSheet").classList.remove("active");
+    }
+
+    function flywheelBackdrop(event) {
+      if (event.target.id === "flywheelSheet") closeFlywheel();
+    }
+
+    function openRecordMenu() {
+      document.getElementById("recordMenuSheet").classList.add("active");
+      refreshIcons();
+    }
+
+    function closeRecordMenu() {
+      document.getElementById("recordMenuSheet").classList.remove("active");
+    }
+
+    function recordMenuBackdrop(event) {
+      if (event.target.id === "recordMenuSheet") closeRecordMenu();
+    }
+
+    const recordToolMap = {
+      language: {
+        title: "切换语言",
+        copy: "录音中切换后，新片段按新语言识别，已生成片段不自动重算。",
+        options: [
+          ["check", "中文普通话", "适合评审、访谈、周会", "当前"],
+          ["languages", "中英混合", "适合技术评审和跨国团队", "可选"],
+          ["globe-2", "English", "English meeting transcription", "可选"]
+        ]
+      },
+      speakers: {
+        title: "管理说话人",
+        copy: "把识别到的说话人改名或合并，会议详情会同步更新。",
+        options: [
+          ["user-round", "说话人1 → 李楠", "出现 12 次，主要讨论产品范围", "已命名"],
+          ["user-round", "说话人2 → 周晨", "出现 9 次，主要讨论技术验证", "已命名"],
+          ["user-round-plus", "说话人3", "出现 5 次，待确认姓名", "待确认"]
+        ]
+      },
+      compliance: {
+        title: "录音合规提示",
+        copy: "本次会议持续显示记录状态，请确保已告知参会人并获得许可。",
+        options: [
+          ["mic", "录音状态持续展示", "顶部和锁屏通知显示记录中", "已开启"],
+          ["lock-keyhole", "私密会议保护", "默认不进入跨会议知识问答", "已开启"],
+          ["trash-2", "会后删除原音频", "仅保留文字纪要和来源时间点", "可选"]
+        ]
+      },
+      settings: {
+        title: "录音设置",
+        copy: "设置只影响本次会议录音质量、后台保护和存储策略。",
+        options: [
+          ["smartphone", "后台录音保护", "锁屏、切后台时持续录音", "开启"],
+          ["audio-lines", "增强人声", "降低环境噪音，提升多人识别", "开启"],
+          ["circle-check-big", "自动提取待办", "识别负责人、截止时间和事项", "开启"]
+        ]
+      }
+    };
+
+    function openRecordTool(kind) {
+      const data = recordToolMap[kind];
+      closeRecordMenu();
+      document.getElementById("recordToolTitle").textContent = data.title;
+      document.getElementById("recordToolCopy").textContent = data.copy;
+      document.getElementById("recordToolOptions").innerHTML = data.options.map((item, index) => `
+        <button class="option-row ${index === 0 ? "active" : ""}" onclick="selectOption(this, '${item[1]}已选中')">
+          <span class="option-icon"><i data-lucide="${item[0]}"></i></span>
+          <span><span class="card-title">${item[1]}</span><span class="card-subtitle">${item[2]}</span></span>
+          <span class="tag ${item[3] === "待确认" ? "amber" : "teal"}">${item[3]}</span>
+        </button>
+      `).join("");
+      document.getElementById("recordToolSheet").classList.add("active");
+      refreshIcons();
+    }
+
+    function closeRecordTool() {
+      document.getElementById("recordToolSheet").classList.remove("active");
+    }
+
+    function recordToolBackdrop(event) {
+      if (event.target.id === "recordToolSheet") closeRecordTool();
+    }
+
+    function toggleDone(btn) {
+      const item = btn.closest(".action-item");
+      item.classList.toggle("done");
+      showToast(item.classList.contains("done") ? "待办已完成" : "已恢复为待处理");
+      refreshIcons();
+    }
+
+    function toggleSwitch(btn) {
+      btn.classList.toggle("on");
+      showToast(btn.classList.contains("on") ? "已开启" : "已关闭");
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.t);
+      showToast.t = window.setTimeout(() => toast.classList.remove("show"), 1700);
+    }
+
+    function askPreset(text) {
+      document.getElementById("askInput").value = text;
+      askQuestion();
+    }
+
+    function askQuestion() {
+      const input = document.getElementById("askInput");
+      const chat = document.getElementById("chatArea");
+      const q = input.value.trim() || "本周我有哪些待办？";
+      const user = document.createElement("div");
+      user.className = "chat-bubble user";
+      user.textContent = q;
+      chat.appendChild(user);
+
+      const ai = document.createElement("div");
+      ai.className = "chat-bubble ai";
+      ai.innerHTML = `已找到相关会议记录：后台录音风险集中在锁屏、切后台、来电中断和系统杀进程四类场景。<button class="evidence-btn" onclick="openSource()"><i data-lucide="link"></i>来源：技术预研 18:28</button>`;
+      chat.appendChild(ai);
+      input.value = "";
+      chat.scrollTop = chat.scrollHeight;
+      refreshIcons();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      refreshIcons();
+      initSwipeDelete();
+    });
+  </script>
+</body>
+</html>

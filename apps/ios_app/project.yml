@@ -1,0 +1,48 @@
+name: HuiyiApp
+options:
+  bundleIdPrefix: com.huiyi
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "5"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+targets:
+  HuiyiApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: HuiyiApp
+        excludes:
+          - Support/Info.plist
+          - Support/HuiyiApp.entitlements
+    settings:
+      base:
+        PRODUCT_NAME: "鲲穹会纪"
+        PRODUCT_BUNDLE_IDENTIFIER: com.huiyi.app.ios
+        INFOPLIST_FILE: HuiyiApp/Support/Info.plist
+        CODE_SIGN_ENTITLEMENTS: HuiyiApp/Support/HuiyiApp.entitlements
+        SUPPORTS_MACCATALYST: NO
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_EMIT_LOC_STRINGS: YES
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+schemes:
+  HuiyiApp:
+    build:
+      targets:
+        HuiyiApp: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    archive:
+      config: Release

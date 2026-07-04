@@ -1,0 +1,9 @@
+.gradle/
+.gradle_home/
+.gradle_download/
+.sdk_download/
+.android_sdk/
+build/
+app/build/
+local.properties
+signing/

@@ -1,0 +1,134 @@
+name: Diagnose Test Containers
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  diagnose-test-containers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect Docker state and logs
+        run: |
+          set +e
+          if ! grep -q '\[diagnose-test\]' "${GITHUB_EVENT_PATH:-/dev/null}" 2>/dev/null; then
+            echo "No [diagnose-test] marker; skipping read-only container diagnosis."
+            exit 0
+          fi
+
+          echo "Read-only diagnosis started at $(date -Is)"
+          echo "No containers will be started, stopped, rebuilt, recreated, or removed."
+          commit_message="$(cat "${GITHUB_EVENT_PATH:-/dev/null}" 2>/dev/null || true)"
+          if printf '%s\n' "${commit_message}" | grep -q '\[diagnose-review-window\]'; then
+            recent_since="2026-06-30T12:47:00Z"
+            recent_until="2026-07-01T13:00:00Z"
+            echo "Review diagnosis window: ${recent_since} to ${recent_until} (2026-06-30 20:47 to 2026-07-01 21:00 Asia/Shanghai)"
+          else
+            recent_since="$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-2H +%Y-%m-%dT%H:%M:%SZ)"
+            recent_until=""
+            echo "Recent diagnosis window: ${recent_since} to now"
+          fi
+
+          echo "===== docker images rebuild metadata ====="
+          for image in deploy-api_server deploy-asr_service deploy-funasr_runtime deploy-ai_service; do
+            docker image inspect --format 'image={{.RepoTags}} id={{.Id}} created={{.Created}} size={{.Size}}' "${image}" || true
+          done
+
+          echo "===== docker volumes metadata ====="
+          docker volume ls --format 'volume={{.Name}} driver={{.Driver}}' | grep -E '(^volume=deploy_(api_server_data|asr_model_cache|funasr_cache)|funasr|asr_model|api_server_data)' || true
+          for volume in deploy_funasr_cache deploy_asr_model_cache deploy_api_server_data funasr_cache asr_model_cache api_server_data; do
+            echo "----- volume ${volume} -----"
+            docker volume inspect --format 'name={{.Name}} mountpoint={{.Mountpoint}} created={{.CreatedAt}} labels={{json .Labels}} options={{json .Options}}' "${volume}" || true
+            mountpoint="$(docker volume inspect --format '{{.Mountpoint}}' "${volume}" 2>/dev/null || true)"
+            if [ -n "${mountpoint}" ] && [ -d "${mountpoint}" ]; then
+              echo "mountpoint_exists=true"
+              du -sh "${mountpoint}" 2>/dev/null || true
+              find "${mountpoint}" -maxdepth 5 -type f 2>/dev/null | wc -l | xargs -r echo "file_count_maxdepth5="
+              find "${mountpoint}" -maxdepth 4 -mindepth 1 2>/dev/null | sed "s#${mountpoint}#<volume>#" | sort | head -n 120 || true
+            else
+              echo "mountpoint_exists=false"
+            fi
+          done
+
+          for name in deploy-api_server-1 deploy-asr_service-1 deploy-funasr_runtime-1 deploy-ai_service-1; do
+            echo "===== inspect ${name} ====="
+            docker inspect --format 'name={{.Name}} image={{.Config.Image}} image_id={{.Image}} created={{.Created}} restart_count={{.RestartCount}} state={{.State.Status}} running={{.State.Running}} restarting={{.State.Restarting}} paused={{.State.Paused}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} error={{.State.Error}} started={{.State.StartedAt}} finished={{.State.FinishedAt}}' "${name}" || true
+            docker inspect --format 'health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${name}" || true
+            docker inspect --format 'mounts={{range .Mounts}}{{.Name}}:{{.Destination}}:{{.RW}};{{end}}' "${name}" || true
+            docker inspect --format 'env={{range .Config.Env}}{{println .}}{{end}}' "${name}" 2>/dev/null | grep -E 'HUIXIAO_(FUNASR|ASR|LIVE)|MODELSCOPE|PYTHON|PATH=' || true
+
+            echo "===== selected logs ${name} ====="
+            if [ -n "${recent_until}" ]; then
+              docker logs --timestamps --since "${recent_since}" --until "${recent_until}" "${name}" 2>&1 \
+                | grep -E -i 'error|exception|traceback|failed|failure|timeout|timed out|502|500|503|bad gateway|gateway|EOF|handshake|ASR|transcri|minutes|voiceprint|speaker|阿里云|转写|语音|声纹|说话人|纪要|失败|异常|超时|覆盖不足|waiting_retry|可继续处理|处理暂未完成' \
+                | tail -n 520 || true
+              echo "===== tail logs ${name} ====="
+              docker logs --timestamps --since "${recent_since}" --until "${recent_until}" "${name}" 2>&1 | tail -n 220 || true
+            else
+              docker logs --timestamps --since "${recent_since}" "${name}" 2>&1 | tail -n 260 || true
+            fi
+          done
+
+          echo "===== api_server sanitized payment env ====="
+          docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' deploy-api_server-1 2>/dev/null > /tmp/huiyi_api_env.txt || true
+          python3 - /tmp/huiyi_api_env.txt <<'PY' || true
+          import hashlib
+          import sys
+
+          interesting = {
+              "HUIXIAO_ALIPAY_APP_ID",
+              "HUIXIAO_ALIPAY_PRIVATE_KEY",
+              "HUIXIAO_ALIPAY_PUBLIC_KEY",
+              "HUIXIAO_ALIPAY_NOTIFY_URL",
+              "HUIXIAO_ALIPAY_GATEWAY_URL",
+              "HUIXIAO_ALIPAY_AES_KEY",
+          }
+
+          def fingerprint(value: str) -> str:
+              text = value.strip().strip('"').strip("'").strip()
+              text = text.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\r", "\n")
+              text = text.replace("\r\n", "\n").replace("\r", "\n")
+              body = "".join(
+                  line.strip()
+                  for line in text.splitlines()
+                  if line.strip() and not line.strip().startswith("-----")
+              )
+              return f"sha256_16={hashlib.sha256(body.encode('ascii', errors='ignore')).hexdigest()[:16]} len={len(body)}"
+
+          env_path = sys.argv[1]
+          with open(env_path, "r", encoding="utf-8", errors="ignore") as handle:
+              lines = handle.readlines()
+
+          for raw in lines:
+              raw = raw.rstrip("\n")
+              if "=" not in raw:
+                  continue
+              key, value = raw.split("=", 1)
+              if key not in interesting:
+                  continue
+              if key in {"HUIXIAO_ALIPAY_PRIVATE_KEY", "HUIXIAO_ALIPAY_PUBLIC_KEY", "HUIXIAO_ALIPAY_AES_KEY"}:
+                  print(f"{key}=<redacted {fingerprint(value)}>")
+              else:
+                  print(f"{key}={value}")
+          PY
+
+          echo "===== docker events recent window ====="
+          if [ -n "${recent_until}" ]; then
+            timeout 30 docker events \
+              --since "${recent_since}" \
+              --until "${recent_until}" \
+              --filter 'container=deploy-api_server-1' \
+              --filter 'container=deploy-asr_service-1' \
+              --filter 'container=deploy-funasr_runtime-1' \
+              --filter 'container=deploy-ai_service-1' || true
+          else
+            timeout 30 docker events \
+              --since "${recent_since}" \
+              --filter 'container=deploy-api_server-1' \
+              --filter 'container=deploy-asr_service-1' \
+              --filter 'container=deploy-funasr_runtime-1' \
+              --filter 'container=deploy-ai_service-1' || true
+          fi
+
+          echo "Read-only diagnosis finished at $(date -Is)"

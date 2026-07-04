@@ -1,0 +1,62 @@
+# Local environments and experiments
+Dolphin/
+Dolphin_poc/
+Dolphin_poc_env/
+
+# Local signing and payment secrets
+*.jks
+*.keystore
+*.p12
+*.pem
+*.p8
+*.cer
+*.csr
+*.key
+*.mobileprovision
+keystore.properties
+*支付秘钥*.md
+*支付密钥*.md
+*开发者账号*.md
+local_secrets/
+
+# UI reference screenshots and generated previews
+ui_refs/
+
+# Python / cache
+__pycache__/
+*.py[cod]
+**/.venv/
+**/data/
+!apps/android_app/app/src/main/java/com/huixiaoai/app/data/
+!apps/android_app/app/src/main/java/com/huixiaoai/app/data/*.kt
+!apps/android_app/app/src/main/java/com/huiyi/app/data/
+!apps/android_app/app/src/main/java/com/huiyi/app/data/*.kt
+**/.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Android local build/runtime artifacts
+**/.gradle/
+**/.gradle_home/
+**/.gradle_download/
+**/.sdk_download/
+**/.android_sdk/
+**/.kotlin/
+**/build/
+**/local.properties
+
+# Local PostgreSQL runtime
+infra/.postgresql/
+infra/.pgdata/
+infra/.logs/
+
+# Local service runtime logs
+services/logs/
+services/funasr_runtime/logs/
+
+# Generated deployment artifacts
+deploy/dist/

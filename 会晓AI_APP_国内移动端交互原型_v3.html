@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>会晓 AI APP 国内移动端交互原型 v3</title>
+  <style>
+    :root {
+      --bg: #eef1f6;
+      --app: #f6f7fa;
+      --white: #fff;
+      --text: #111827;
+      --sub: #5f6b7a;
+      --muted: #929baa;
+      --line: #e7eaf0;
+      --blue: #1677ff;
+      --blue-deep: #0d64df;
+      --blue-soft: #edf5ff;
+      --green: #13b77b;
+      --orange: #ff8a00;
+      --red: #ef4444;
+      --radius: 18px;
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    button, input {
+      border: 0;
+      outline: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+    }
+
+    button { cursor: pointer; }
+
+    .stage {
+      width: min(1180px, 100vw);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      padding: 32px;
+    }
+
+    .note h1 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .note p {
+      margin: 0 0 18px;
+      color: #596678;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .note ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      color: #536071;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .note li {
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .note li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .refs {
+      margin-top: 22px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .refs img {
+      width: 50px;
+      height: 76px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #dfe4ec;
+      background: #fff;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 10px;
+      border-radius: 42px;
+      background: #101722;
+      box-shadow: 0 26px 60px rgba(16, 23, 34, .22);
+    }
+
+    .app {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 32px;
+      background: var(--app);
+    }
+
+    .status {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      color: #111827;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--app);
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .battery {
+      width: 23px;
+      height: 11px;
+      border: 1.5px solid #111827;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 14px;
+      height: 5px;
+      border-radius: 3px;
+      background: #111827;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      background: #111827;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .screen {
+      display: none;
+      height: calc(100% - 42px);
+      overflow-y: auto;
+      padding: 0 0 72px;
+      scrollbar-width: none;
+    }
+
+    .screen::-webkit-scrollbar { display: none; }
+    .screen.active { display: block; }
+
+    .page-pad { padding: 0 18px; }
+
+    .nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 70px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, .98);
+      z-index: 20;
+    }
+
+    .nav button {
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 4px;
+      color: #8d97a6;
+      font-size: 11px;
+    }
+
+    .nav .ico {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .nav button.active {
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    .nav button.active .ico { background: var(--blue-soft); }
+
+    .topbar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+    }
+
+    .topbar .title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .icon {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 18px;
+    }
+
+    .home-head {
+      padding: 4px 18px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .home-head h2 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .home-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: linear-gradient(135deg, #1677ff, #48b9ff);
+      font-weight: 700;
+    }
+
+    .search {
+      height: 40px;
+      margin: 0 18px 12px;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9aa3b2;
+      font-size: 13px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+    }
+
+    .action-strip {
+      display: grid;
+      grid-template-columns: 1.18fr .82fr;
+      gap: 1px;
+      margin: 0 18px 18px;
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--line);
+    }
+
+    .start-action {
+      min-height: 116px;
+      padding: 18px;
+      color: #fff;
+      text-align: left;
+      background: linear-gradient(145deg, #1677ff, #0f65e8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .start-action::after {
+      content: "";
+      position: absolute;
+      right: -28px;
+      bottom: -34px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .13);
+    }
+
+    .start-action b {
+      display: block;
+      font-size: 20px;
+      line-height: 1.3;
+    }
+
+    .start-action span {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.55;
+      opacity: .82;
+    }
+
+    .side-actions {
+      display: grid;
+      gap: 1px;
+      background: var(--line);
+    }
+
+    .side-actions button {
+      padding: 14px;
+      background: #fff;
+      text-align: left;
+    }
+
+    .side-actions b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .side-actions span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .section {
+      margin: 0 0 12px;
+      background: #fff;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-title {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+    }
+
+    .section-title h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .section-title button {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .row {
+      width: 100%;
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      text-align: left;
+      background: #fff;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-title + .row { border-top: 0; }
+
+    .row-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .row-main b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 15px;
+      line-height: 1.35;
+      color: var(--text);
+    }
+
+    .row-main span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .row-meta {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .badge {
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 9px;
+      border-radius: 12px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge.green { color: var(--green); background: #eaf8f2; }
+    .badge.orange { color: var(--orange); background: #fff4e3; }
+    .badge.gray { color: #697386; background: #f2f4f7; }
+
+    .mini-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .seg {
+      height: 38px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      padding: 4px;
+      margin: 0 18px 12px;
+      border-radius: 19px;
+      background: #eceff4;
+    }
+
+    .seg button {
+      border-radius: 15px;
+      color: #5d6878;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .seg button.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(17, 24, 39, .08);
+    }
+
+    .record-banner {
+      margin: 0 18px 12px;
+      padding: 16px;
+      color: #fff;
+      border-radius: 18px;
+      background: #1677ff;
+    }
+
+    .record-banner h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .record-banner p {
+      margin: 8px 0 0;
+      font-size: 12px;
+      line-height: 1.6;
+      opacity: .86;
+    }
+
+    .live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.16);
+      font-size: 11px;
+      font-weight: 700;
+      float: right;
+    }
+
+    .live i {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .speaker-row {
+      align-items: flex-start;
+    }
+
+    .speaker-name {
+      width: 58px;
+      flex: 0 0 auto;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .speech {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .speech p {
+      margin: 0;
+      color: #252b36;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .speech time {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .record-control {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 16px;
+      height: 62px;
+      display: grid;
+      grid-template-columns: 1fr 52px 1fr;
+      align-items: center;
+      padding: 0 14px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: #fff;
+      box-shadow: 0 12px 30px rgba(17, 24, 39, .12);
+      z-index: 30;
+    }
+
+    .record-control small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .record-control b {
+      display: block;
+      margin-top: 2px;
+      font-size: 16px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stop {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #ffe7e5;
+    }
+
+    .stop i {
+      width: 17px;
+      height: 17px;
+      border-radius: 5px;
+      background: var(--red);
+    }
+
+    .detail-title {
+      padding: 4px 18px 14px;
+    }
+
+    .detail-title h2 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.35;
+    }
+
+    .detail-title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .audio-bar {
+      height: 54px;
+      margin: 0 18px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .play {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--blue);
+      font-size: 12px;
+    }
+
+    .wave {
+      flex: 1;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .wave i {
+      width: 4px;
+      border-radius: 5px;
+      background: #b9d7ff;
+    }
+
+    .wave i:nth-child(3n) { height: 22px; background: #7db7ff; }
+    .wave i:nth-child(3n+1) { height: 12px; }
+    .wave i:nth-child(3n+2) { height: 17px; }
+
+    .detail-panel { display: none; }
+    .detail-panel.active { display: block; }
+
+    .text-list {
+      padding: 0 18px 12px;
+      background: #fff;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .text-list h3 {
+      margin: 0;
+      padding: 14px 0 8px;
+      font-size: 16px;
+    }
+
+    .text-list ul {
+      margin: 0;
+      padding: 0 0 0 18px;
+      color: #252b36;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .source {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .task-check {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #cbd3df;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .task-check.done {
+      border-color: var(--green);
+      background: radial-gradient(circle at center, #fff 0 4px, var(--green) 5px);
+    }
+
+    .ask-box {
+      margin: 0 18px 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .ask-box input {
+      width: 100%;
+      height: 34px;
+      font-size: 14px;
+    }
+
+    .profile-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 18px 18px;
+    }
+
+    .profile-head .avatar {
+      width: 48px;
+      height: 48px;
+    }
+
+    .profile-head b {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .profile-head span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .storage {
+      width: 100%;
+      height: 7px;
+      margin-top: 8px;
+      border-radius: 5px;
+      overflow: hidden;
+      background: #edf0f4;
+    }
+
+    .storage i {
+      display: block;
+      width: 42%;
+      height: 100%;
+      background: var(--blue);
+    }
+
+    .switch {
+      width: 42px;
+      height: 24px;
+      border-radius: 12px;
+      padding: 3px;
+      background: #d9e0e9;
+    }
+
+    .switch i {
+      display: block;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(17,24,39,.14);
+    }
+
+    .sheet-mask {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: flex-end;
+      background: rgba(17, 24, 39, .42);
+      z-index: 80;
+    }
+
+    .sheet-mask.show { display: flex; }
+
+    .sheet {
+      width: 100%;
+      padding: 14px 18px 24px;
+      border-radius: 24px 24px 0 0;
+      background: #fff;
+      animation: up .18s ease-out;
+    }
+
+    @keyframes up {
+      from { transform: translateY(24px); opacity: .7; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .sheet h3 {
+      margin: 4px 0 12px;
+      font-size: 17px;
+    }
+
+    .sheet .row { padding-left: 0; padding-right: 0; }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 92px;
+      transform: translateX(-50%);
+      display: none;
+      max-width: 280px;
+      padding: 10px 14px;
+      border-radius: 18px;
+      color: #fff;
+      background: rgba(17, 24, 39, .86);
+      font-size: 13px;
+      z-index: 100;
+    }
+
+    .toast.show { display: block; }
+
+    @media (max-width: 860px) {
+      .stage {
+        min-height: auto;
+        grid-template-columns: 1fr;
+        padding: 18px;
+        gap: 20px;
+      }
+
+      .note { order: 2; }
+      .phone { margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <section class="note">
+      <h1>会晓 AI APP 交互原型 v3</h1>
+      <p>新版保留 v2 的国内移动端方向，但去掉多屏静态展示和卡片堆叠，改为单机可点击交互原型。</p>
+      <ul>
+        <li>首页采用国内 App 常见的功能区 + 分组列表，会议记录以行列表呈现。</li>
+        <li>点击开始记录、会议、底部导航、详情分段、来源、分享均有交互反馈。</li>
+        <li>服务范围只覆盖 PRD 已写的会议采集、转写、纪要、待办、知识库、数据隐私。</li>
+      </ul>
+      <div class="refs">
+        <img src="ui_refs/xunfei_xiaomi_1.jpg" alt="讯飞听见截图参考" />
+        <img src="ui_refs/xunfei_xiaomi_2.jpg" alt="讯飞听见截图参考" />
+        <img src="ui_refs/feishu_3.jpg" alt="飞书截图参考" />
+      </div>
+    </section>
+
+    <section class="phone" aria-label="会晓 AI APP 交互原型">
+      <div class="app">
+        <div class="status">
+          <span>9:41</span>
+          <span class="status-icons">5G <span class="battery"></span></span>
+        </div>
+
+        <section class="screen active" id="home">
+          <div class="home-head">
+            <div>
+              <h2>会晓 AI</h2>
+              <p>今天有 2 场会议待处理</p>
+            </div>
+            <button class="avatar" onclick="go('profile')">张</button>
+          </div>
+          <button class="search" onclick="toast('搜索会议、发言人、待办')">⌕ 搜索会议、发言人、待办</button>
+          <div class="action-strip">
+            <button class="start-action" onclick="openSheet('consentSheet')">
+              <b>开始记录</b>
+              <span>实时录音转写，结束后自动生成纪要与待办</span>
+            </button>
+            <div class="side-actions">
+              <button onclick="toast('打开系统文件选择器')"><b>导入文件</b><span>音频 / 视频</span></button>
+              <button onclick="toast('进入会议模板库')"><b>会议模板</b><span>周会、评审、拜访</span></button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title"><h3>今日会议</h3><button onclick="toast('打开系统日历')">查看日历</button></div>
+            <button class="row" onclick="openSheet('consentSheet')">
+              <span class="mini-dot"></span>
+              <span class="row-main"><b>产品需求评审会</b><span>14:00-15:00 · 研发会议室</span></span>
+              <span class="badge orange">待记录</span>
+            </button>
+          </div>
+
+          <div class="section">
+            <div class="section-title"><h3>最近会议</h3><button onclick="go('detail')">全部</button></div>
+            <button class="row" onclick="go('detail')">
+              <span class="row-main"><b>客户回访策略讨论</b><span>35:28 · 已生成 AI 纪要和 6 条待办</span></span>
+              <span class="badge green">已完成</span>
+            </button>
+            <button class="row" onclick="go('detail')">
+              <span class="row-main"><b>移动端原型评审</b><span>28:13 · 转写完成，纪要待确认</span></span>
+              <span class="badge">处理中</span>
+            </button>
+            <button class="row" onclick="go('detail')">
+              <span class="row-main"><b>Dolphin 方言识别测试</b><span>12:08 · 3 条英文术语需复核</span></span>
+              <span class="row-meta">昨天 ›</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="screen" id="record">
+          <div class="topbar">
+            <button class="icon" onclick="go('home')">‹</button>
+            <span class="title">实时记录</span>
+            <button class="icon" onclick="toast('录音设置')">⋯</button>
+          </div>
+          <div class="record-banner">
+            <span class="live"><i></i>记录中</span>
+            <h2>产品需求评审会</h2>
+            <p>已识别 4 位发言人 · 实时转写正常 · 本地录音保存中</p>
+          </div>
+          <div class="seg">
+            <button class="active" onclick="toast('当前显示实时原文')">原文</button>
+            <button onclick="toast('已标记当前重点')">要点</button>
+            <button onclick="go('tasks')">待办</button>
+          </div>
+          <div class="section">
+            <div class="row speaker-row">
+              <span class="speaker-name">发言人1</span>
+              <span class="speech"><p>这次首版重点先保证安卓端的录音、转写、纪要和待办闭环，云同步可以后置。</p><time>00:02:16</time></span>
+            </div>
+            <div class="row speaker-row">
+              <span class="speaker-name">发言人2</span>
+              <span class="speech"><p>专业词库要预留入口，尤其是项目名、客户名和中英文缩写，后面会直接影响识别质量。</p><time>00:02:44</time></span>
+            </div>
+            <div class="row speaker-row">
+              <span class="speaker-name">发言人3</span>
+              <span class="speech"><p>可核验纪要必须能点回原文和音频时间点，这个是产品差异化，不要只做摘要。</p><time>00:03:12</time></span>
+            </div>
+          </div>
+          <div style="height:78px"></div>
+          <div class="record-control">
+            <div><small>录音时长</small><b>00:18:42</b></div>
+            <button class="stop" onclick="finishRecord()"><i></i></button>
+            <div style="text-align:right"><small>转写状态</small><b>正常</b></div>
+          </div>
+        </section>
+
+        <section class="screen" id="detail">
+          <div class="topbar">
+            <button class="icon" onclick="go('home')">‹</button>
+            <span></span>
+            <button class="icon" onclick="openSheet('shareSheet')">↗</button>
+          </div>
+          <div class="detail-title">
+            <h2>客户回访策略讨论</h2>
+            <p>35:28 · 2026-05-20 · 4 位发言人</p>
+          </div>
+          <div class="audio-bar">
+            <button class="play" onclick="toast('定位播放 12:40')">▶</button>
+            <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <span style="font-size:12px">12:40</span>
+          </div>
+          <div class="seg">
+            <button class="active" onclick="detailTab('summary', this)">纪要</button>
+            <button onclick="detailTab('transcript', this)">原文</button>
+            <button onclick="detailTab('todoInDetail', this)">待办</button>
+          </div>
+          <div class="detail-panel active" id="summary">
+            <div class="text-list">
+              <h3>会议摘要</h3>
+              <ul>
+                <li>客户对上线节奏有明确要求，优先关注安卓首版稳定性。 <button class="source" onclick="openSheet('sourceSheet')">来源 08:14</button></li>
+                <li>数据默认本地保存，云端能力作为后续同步与分享场景补充。 <button class="source" onclick="openSheet('sourceSheet')">来源 12:40</button></li>
+              </ul>
+              <h3>决策与风险</h3>
+              <ul>
+                <li>首版按本地优先方案推进，服务端只承担重计算任务。</li>
+                <li>ASR 对专业英文缩写的识别需要在测试阶段重点验证。</li>
+              </ul>
+            </div>
+          </div>
+          <div class="detail-panel" id="transcript">
+            <div class="section">
+              <div class="row speaker-row">
+                <span class="speaker-name">王磊</span>
+                <span class="speech"><p>安卓首版不要把云同步作为前置阻塞，先把手机本地录音和后处理链路跑通。</p><time>08:14</time></span>
+              </div>
+              <div class="row speaker-row">
+                <span class="speaker-name">张敏</span>
+                <span class="speech"><p>需要保留分享文件和导出能力，Markdown、Word、PDF、TXT 都在需求里。</p><time>12:40</time></span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-panel" id="todoInDetail">
+            <div class="section">
+              <button class="row" onclick="toggleTask(this)">
+                <span class="task-check"></span>
+                <span class="row-main"><b>补充安卓端录音生命周期异常流程</b><span>负责人：产品 · 本周五 · 来源 18:42</span></span>
+              </button>
+              <button class="row" onclick="toggleTask(this)">
+                <span class="task-check"></span>
+                <span class="row-main"><b>准备含英文术语的中文会议音频样本</b><span>负责人：研发 · 明天 · 来源 07:35</span></span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="tasks">
+          <div class="topbar">
+            <span class="title">待办</span>
+            <button class="icon" onclick="toast('新增手动待办')">＋</button>
+          </div>
+          <div class="seg">
+            <button class="active">待确认</button>
+            <button onclick="toast('切换到待处理')">待处理</button>
+            <button onclick="toast('切换到已完成')">已完成</button>
+          </div>
+          <div class="section">
+            <button class="row" onclick="toggleTask(this)">
+              <span class="task-check"></span>
+              <span class="row-main"><b>整理安卓首版 P0 开发范围</b><span>来源：产品需求评审会 00:18:42，可回溯原文音频。</span></span>
+            </button>
+            <button class="row" onclick="toggleTask(this)">
+              <span class="task-check"></span>
+              <span class="row-main"><b>验证 Dolphin-CN-Dialect 对英文术语识别</b><span>来源：技术选型讨论 00:07:35，需补充测试音频。</span></span>
+            </button>
+            <button class="row" onclick="toggleTask(this)">
+              <span class="task-check done"></span>
+              <span class="row-main"><b>确认首版文件存储策略</b><span>默认本地保存，云同步和分享场景再使用对象存储。</span></span>
+            </button>
+          </div>
+        </section>
+
+        <section class="screen" id="knowledge">
+          <div class="topbar">
+            <span class="title">知识库</span>
+            <button class="icon" onclick="toast('筛选项目/客户/标签')">筛</button>
+          </div>
+          <div class="ask-box">
+            <input value="安卓首版的核心边界是什么？" onclick="this.select()" />
+          </div>
+          <div class="section">
+            <div class="section-title"><h3>推荐问题</h3><button onclick="toast('已换一批问题')">换一批</button></div>
+            <button class="row" onclick="toast('生成问答结果')">
+              <span class="row-main"><b>上次客户对价格有什么顾虑？</b><span>引用客户拜访、回访会议内容回答</span></span>
+              <span class="row-meta">›</span>
+            </button>
+            <button class="row" onclick="toast('生成问答结果')">
+              <span class="row-main"><b>安卓首版哪些功能不能延期？</b><span>基于最近 3 场产品评审会议</span></span>
+              <span class="row-meta">›</span>
+            </button>
+          </div>
+          <div class="text-list">
+            <h3>问答结果</h3>
+            <ul>
+              <li>首版应优先完成录音、实时转写、说话人区分、AI 纪要、待办管理、会议详情编辑导出与本地数据管理。</li>
+              <li><button class="source" onclick="openSheet('sourceSheet')">来源：产品需求评审会 00:18:42</button></li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="screen" id="profile">
+          <div class="topbar">
+            <span class="title">我的</span>
+            <button class="icon" onclick="toast('设置')">⚙</button>
+          </div>
+          <div class="profile-head">
+            <span class="avatar">张</span>
+            <span><b>张敏</b><span>本地数据、权限与缓存管理</span></span>
+          </div>
+          <div class="section">
+            <div class="row">
+              <span class="row-main"><b>本地文件</b><span>已使用 2.4GB / 手机可用 18.6GB <span class="storage"><i></i></span></span></span>
+            </div>
+            <div class="row"><span class="row-main"><b>麦克风权限</b></span><span class="row-meta">已开启</span></div>
+            <div class="row"><span class="row-main"><b>通知提醒</b></span><span class="row-meta">已开启</span></div>
+            <div class="row"><span class="row-main"><b>日历读取</b></span><span class="row-meta">未开启</span></div>
+            <button class="row" onclick="toast('本地缓存已清理')"><span class="row-main"><b>清理本地缓存</b></span><span class="row-meta">428MB ›</span></button>
+          </div>
+          <div class="section">
+            <div class="row"><span class="row-main"><b>云端同步</b><span>后期能力，当前默认关闭</span></span><span class="switch"><i></i></span></div>
+            <button class="row" onclick="toast('查看分享链接')"><span class="row-main"><b>分享链接管理</b></span><span class="row-meta">3 个有效 ›</span></button>
+            <button class="row" onclick="openSheet('deleteSheet')"><span class="row-main"><b>删除会议数据</b><span>音频 / 转写 / 纪要 / 索引</span></span><span class="row-meta">›</span></button>
+          </div>
+        </section>
+
+        <nav class="nav">
+          <button class="active" data-target="home" onclick="go('home')"><span class="ico">⌂</span>首页</button>
+          <button data-target="tasks" onclick="go('tasks')"><span class="ico">✓</span>待办</button>
+          <button data-target="knowledge" onclick="go('knowledge')"><span class="ico">问</span>知识库</button>
+          <button data-target="profile" onclick="go('profile')"><span class="ico">我</span>我的</button>
+        </nav>
+
+        <div class="sheet-mask" id="consentSheet">
+          <div class="sheet">
+            <h3>开始记录前确认</h3>
+            <div class="row"><span class="row-main"><b>麦克风权限</b><span>已开启，将保存本地录音文件</span></span><span class="badge green">正常</span></div>
+            <div class="row"><span class="row-main"><b>实时转写服务</b><span>连接后 5 秒内展示首段转写</span></span><span class="badge">可用</span></div>
+            <button class="row" onclick="closeSheets(); go('record')"><span class="row-main"><b style="color:var(--blue)">开始录音</b></span><span class="row-meta">›</span></button>
+            <button class="row" onclick="closeSheets()"><span class="row-main"><b>取消</b></span></button>
+          </div>
+        </div>
+
+        <div class="sheet-mask" id="shareSheet">
+          <div class="sheet">
+            <h3>分享与导出</h3>
+            <button class="row" onclick="toast('已复制摘要'); closeSheets()"><span class="row-main"><b>复制摘要</b><span>适合发送到微信、飞书、钉钉</span></span></button>
+            <button class="row" onclick="toast('导出 Word / PDF / TXT'); closeSheets()"><span class="row-main"><b>导出文件</b><span>Markdown、Word、PDF、TXT</span></span></button>
+            <button class="row" onclick="closeSheets()"><span class="row-main"><b>取消</b></span></button>
+          </div>
+        </div>
+
+        <div class="sheet-mask" id="sourceSheet">
+          <div class="sheet">
+            <h3>来源核验</h3>
+            <div class="row speaker-row">
+              <span class="speaker-name">王磊</span>
+              <span class="speech"><p>安卓首版不要把云同步作为前置阻塞，先把手机本地录音和后处理链路跑通。</p><time>08:14 · 点击播放可定位音频</time></span>
+            </div>
+            <button class="row" onclick="toast('音频已定位到 08:14')"><span class="row-main"><b style="color:var(--blue)">播放此处音频</b></span><span class="row-meta">▶</span></button>
+            <button class="row" onclick="closeSheets()"><span class="row-main"><b>关闭</b></span></button>
+          </div>
+        </div>
+
+        <div class="sheet-mask" id="deleteSheet">
+          <div class="sheet">
+            <h3>删除会议数据</h3>
+            <div class="row"><span class="row-main"><b>将删除音频、转写、纪要、待办和知识库索引</b><span>已分享链接会失效</span></span></div>
+            <button class="row" onclick="toast('已删除会议数据'); closeSheets()"><span class="row-main"><b style="color:var(--red)">确认删除</b></span></button>
+            <button class="row" onclick="closeSheets()"><span class="row-main"><b>取消</b></span></button>
+          </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const mainTabs = new Set(['home', 'tasks', 'knowledge', 'profile']);
+    let toastTimer = null;
+
+    function go(id) {
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.toggle('active', screen.id === id);
+      });
+      document.querySelectorAll('.nav button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.target === id || (!mainTabs.has(id) && btn.dataset.target === 'home'));
+      });
+    }
+
+    function detailTab(id, btn) {
+      document.querySelectorAll('.detail-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === id);
+      });
+      btn.parentElement.querySelectorAll('button').forEach(item => item.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function openSheet(id) {
+      closeSheets();
+      document.getElementById(id).classList.add('show');
+    }
+
+    function closeSheets() {
+      document.querySelectorAll('.sheet-mask').forEach(sheet => sheet.classList.remove('show'));
+    }
+
+    function toast(text) {
+      const el = document.getElementById('toast');
+      el.textContent = text;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 1600);
+    }
+
+    function toggleTask(row) {
+      const check = row.querySelector('.task-check');
+      if (check) {
+        check.classList.toggle('done');
+        toast(check.classList.contains('done') ? '已确认待办' : '已取消确认');
+      }
+    }
+
+    function finishRecord() {
+      toast('录音结束，正在生成纪要');
+      setTimeout(() => go('detail'), 700);
+    }
+
+    document.querySelectorAll('.sheet-mask').forEach(mask => {
+      mask.addEventListener('click', event => {
+        if (event.target === mask) closeSheets();
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+services:
+  api_server:
+    build:
+      context: ../services/api_server
+    ports:
+      - "8080:8080"
+    environment:
+      HUIXIAO_DATABASE_URL: ${HUIXIAO_DATABASE_URL:?HUIXIAO_DATABASE_URL is required}
+      HUIXIAO_ASR_SERVICE_URL: http://asr_service:8081
+      HUIXIAO_ASR_LIVE_WS_URL: ws://asr_service:8081/api/v1/live/ws
+      HUIXIAO_AI_SERVICE_URL: http://ai_service:8082
+      HUIXIAO_DATA_DIR: /data
+      HUIXIAO_MAX_UPLOAD_MB: 500
+      HUIXIAO_CORS_ORIGINS: "*"
+    volumes:
+      - api_server_data:/data
+
+  asr_service:
+    build:
+      context: ../services/asr_service
+    depends_on:
+      - funasr_runtime
+    ports:
+      - "8081:8081"
+    environment:
+      HUIXIAO_FFMPEG_PATH: ffmpeg
+      HUIXIAO_ASR_DEVICE: cpu
+      HUIXIAO_ASR_MAX_SPEAKERS: ${HUIXIAO_ASR_MAX_SPEAKERS:-15}
+      HUIXIAO_FUNASR_RUNTIME_WS_URL: ws://funasr_runtime:10095
+      HUIXIAO_LIVE_ASR_PROVIDER: ${HUIXIAO_LIVE_ASR_PROVIDER:-aliyun}
+      HUIXIAO_LLM_API_KEY: ${HUIXIAO_LLM_API_KEY:-}
+      HUIXIAO_ALIYUN_DASHSCOPE_API_KEY: ${HUIXIAO_ALIYUN_DASHSCOPE_API_KEY:-}
+      HUIXIAO_ALIYUN_REALTIME_MODEL: ${HUIXIAO_ALIYUN_REALTIME_MODEL:-qwen3-asr-flash-realtime}
+      HUIXIAO_LIVE_ASR_MODE: online_refine
+      HUIXIAO_LIVE_CHUNK_SIZE: 0,8,4
+      HUIXIAO_LIVE_CHUNK_INTERVAL: "8"
+      HUIXIAO_LIVE_REQUIRE_SPEAKER: "false"
+    volumes:
+      - asr_model_cache:/root/.cache/modelscope
+      - api_server_data:/data
+
+  funasr_runtime:
+    build:
+      context: ../deploy
+      dockerfile: funasr-runtime.Dockerfile
+    environment:
+      MODELSCOPE_DOMAIN: ${MODELSCOPE_DOMAIN:-modelscope.cn}
+      MODELSCOPE_DOWNLOAD_PARALLELS: ${MODELSCOPE_DOWNLOAD_PARALLELS:-4}
+      MODELSCOPE_PARALLEL_DOWNLOAD_THRESHOLD_MB: ${MODELSCOPE_PARALLEL_DOWNLOAD_THRESHOLD_MB:-64}
+    command:
+      - python
+      - -u
+      - /app/funasr_wss_server.py
+      - --host
+      - 0.0.0.0
+      - --port
+      - "10095"
+      - --device
+      - ${HUIXIAO_FUNASR_RUNTIME_DEVICE:-cpu}
+      - --ngpu
+      - "${HUIXIAO_FUNASR_RUNTIME_NGPU:-0}"
+      - --ncpu
+      - "${HUIXIAO_FUNASR_RUNTIME_NCPU:-2}"
+      - --worker_threads
+      - "${HUIXIAO_FUNASR_WORKER_THREADS:-4}"
+      - --concurrent_vad
+      - "${HUIXIAO_FUNASR_CONCURRENT_VAD:-4}"
+      - --concurrent_asr_online
+      - "${HUIXIAO_FUNASR_CONCURRENT_ASR_ONLINE:-4}"
+      - --concurrent_asr_offline
+      - "${HUIXIAO_FUNASR_CONCURRENT_ASR_OFFLINE:-2}"
+      - --concurrent_punc
+      - "${HUIXIAO_FUNASR_CONCURRENT_PUNC:-1}"
+      - --concurrent_sv
+      - "${HUIXIAO_FUNASR_CONCURRENT_SV:-1}"
+      - --max_speakers
+      - "${HUIXIAO_ASR_MAX_SPEAKERS:-15}"
+      - --speaker_cluster_threshold
+      - "${HUIXIAO_SPEAKER_CLUSTER_THRESHOLD:-0.62}"
+      - --vad_max_end_silence_time
+      - "${HUIXIAO_FUNASR_VAD_MAX_END_SILENCE_MS:-800}"
+      - --offline_endpoint_delay_ms
+      - "${HUIXIAO_FUNASR_OFFLINE_ENDPOINT_DELAY_MS:-300}"
+      - --offline_merge_silence_ms
+      - "${HUIXIAO_FUNASR_OFFLINE_MERGE_SILENCE_MS:-260}"
+      - --offline_pre_roll_ms
+      - "${HUIXIAO_FUNASR_OFFLINE_PRE_ROLL_MS:-240}"
+      - --certfile=
+      - --keyfile=
+    volumes:
+      - funasr_cache:/root/.cache/modelscope
+
+  ai_service:
+    build:
+      context: ../services/ai_service
+    ports:
+      - "8082:8082"
+    environment:
+      HUIXIAO_LLM_BASE_URL: ${HUIXIAO_LLM_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      HUIXIAO_LLM_API_KEY: ${HUIXIAO_LLM_API_KEY:-}
+      HUIXIAO_LLM_MODEL: ${HUIXIAO_LLM_MODEL:-qwen3.7-plus}
+      HUIXIAO_EMBEDDING_MODEL: ${HUIXIAO_EMBEDDING_MODEL:-text-embedding-v4}
+      HUIXIAO_EMBEDDING_DIMENSIONS: ${HUIXIAO_EMBEDDING_DIMENSIONS:-1024}
+      HUIXIAO_LLM_TIMEOUT_SECONDS: ${HUIXIAO_LLM_TIMEOUT_SECONDS:-120}
+      HUIXIAO_LLM_TEMPERATURE: ${HUIXIAO_LLM_TEMPERATURE:-0.2}
+
+volumes:
+  api_server_data:
+  asr_model_cache:
+  funasr_cache:
